@@ -18,6 +18,6 @@ Unused parameters should get omitted, for example: `https://pxls.space/?template
 
 Contributors
 ------------
-`Endrik`: Originally created the script on 4th of April 2017
-`schrej`: Who fixed the script to make it work again and is still contributing
-`hammer065`: Me, who did the last major changes to the UserScript
+ - `Endrik`: Originally created the script on 4th of April 2017
+ - `schrej`: Who fixed the script to make it work again and is still contributing
+ - `hammer065`: Me, who did the last major changes to the UserScript
