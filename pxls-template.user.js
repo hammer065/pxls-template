@@ -2,9 +2,9 @@
 // @name         pxls.space pr0 template
 // @namespace    pr0
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
-// @downloadURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
+// @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.4.7
+// @version      0.5
 // @description  Es ist Zeit für Reich
 // @author       Endrik, schrej and >_hammer065
 // @match        http://pxls.space/*
@@ -19,6 +19,8 @@
 (function () {
   'use strict';
   const storagePrefix = "pxls-template.";
+  const baseURL = "https://rawgit.com/hammer065/pxls-template/master/";
+  const baseStaticURL = "https://cdn.rawgit.com/hammer065/pxls-template/master/";
 
   var getString = function(string, args, language) {
     var output = "";
@@ -36,7 +38,8 @@
         "invalid-storage-key":"Ungültiger Storagename!",
         "prompt-x-coord":"Bitte gib die X-Koordinate ein, zu der du springen willst:",
         "prompt-y-coord":"Bitte gib die Y-Koordinate ein, zu der du springen willst:",
-        "jump-to-coordinates":"Springe zu Koordinaten [J]"
+        "jump-to-coordinates":"Springe zu Koordinaten [J]",
+        "ran-twice":"Anscheinend hast du das UserScript mehrfach installiert!\nBitte deinstalliere ALLE Versionen und installiere die Neueste!"
       },
       "en":{
         "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template'),
@@ -51,7 +54,8 @@
         "invalid-storage-key":"Invalid storage key!",
         "prompt-x-coord":"Please enter the X-coordinate you want to jump to:",
         "prompt-y-coord":"Please enter the Y-coordinate you want to jump to:",
-        "jump-to-coordinates":"Jump to Coordinates [J]"
+        "jump-to-coordinates":"Jump to Coordinates [J]",
+        "ran-twice":"It seems that you've installed the UserScript multiply!\nPlease uninstall ALL versions and install the newest one!"
       }
     }
     if(typeof string !== "string")
@@ -162,6 +166,17 @@
     }
   };
 
+  const uniqueIDs = ["overlayImage", "templateContainer", "templateCheckbox", "flashCheckbox"];
+  for(var i=0; i<uniqueIDs.length; i++)
+  {
+    if(document.getElementById(uniqueIDs[i]) !== null)
+    {
+      console.error(getString("ran-twice"));
+      alert(getString("ran-twice"));
+      return;
+    }
+  }
+
   var version = "";
   if(typeof GM_info !== "undefined" && typeof GM_info.script !== "undefined" && typeof GM_info.script.version !== "undefined")
   {
@@ -169,9 +184,6 @@
   }
 
   console.log("pxls-template"+(version!==""?(" v"+version.toString()):""));
-
-  const baseURL = "https://rawgit.com/hammer065/pxls-template/master/";
-  const baseStaticURL = "https://cdn.rawgit.com/hammer065/pxls-template/master/";
 
   function toHtml(str) {
     var htmlObject = document.createElement('div');
@@ -195,7 +207,7 @@
   document.head.appendChild(styleElement);
 
   const templateContainer = document.createElement("div");
-  templateContainer.setAttribute("id", "tempcontainer");
+  templateContainer.setAttribute("id", "templateContainer");
   templateContainer.innerHTML = getString("title-name")+(version!==""?(' <span class="version">v'+version.toString()+'</span>'):"")+'<br />';
 
   if(typeof params.template !== "undefined")
@@ -204,7 +216,7 @@
     var img = document.createElement("img");
     img.src = params.template;
     img.id = "overlayImage";
-    img.style.opacity = getStorage("slider", 0.5);
+    img.style.opacity = getStorage("templateSlider", 0.5);
     if(typeof params.ox === "undefined")
     {
       console.log(getString("no-ox"));
@@ -250,7 +262,33 @@
     templateCheckboxLabel.innerHTML = ("&nbsp;"+getString("template-label"));
     controlsContainer.appendChild(templateCheckboxLabel);
 
-    controlsContainer.appendChild(document.createElement("br"));
+    var templateSliderStatusValue = function(float){return (Math.round(float*1000)/10).toString()+"%"};
+    const templateSliderContainer = document.createElement("div");
+    templateSliderContainer.setAttribute("class", "sliderContainer");
+    var templateSlider = document.createElement("input");
+    templateSlider.setAttribute("type", "range");
+    templateSlider.setAttribute("min", "0");
+    templateSlider.setAttribute("max", "1");
+    templateSlider.setAttribute("step", "0.01");
+    templateSlider.value = img.style.opacity;
+    templateSliderContainer.appendChild(templateSlider);
+    var templateSliderStatus = document.createElement("div");
+    templateSliderStatus.setAttribute("class", "sliderStatus");
+    templateSliderStatus.innerHTML = templateSliderStatusValue(templateSlider.value);
+    templateSliderContainer.appendChild(templateSliderStatus);
+    controlsContainer.appendChild(templateSliderContainer);
+
+    var updateTemplateSlider = function(event) {
+      if(typeof event !== "boolean" || event === true)
+      {
+        setStorage("templateSlider", templateSlider.value);
+      }
+      templateSliderStatus.innerHTML = templateSliderStatusValue(templateSlider.value);
+      img.style.opacity = templateSlider.value;
+    };
+    templateSlider.addEventListener("change", updateTemplateSlider);
+    templateSlider.addEventListener("input", updateTemplateSlider);
+
     const flashCheckbox = document.createElement("input");
     flashCheckbox.setAttribute("type", "checkbox");
     flashCheckbox.setAttribute("id", "flashCheckbox");
@@ -262,9 +300,35 @@
     flashCheckboxLabel.innerHTML = ("&nbsp;"+getString("flash-label"));
     controlsContainer.appendChild(flashCheckboxLabel);
 
+    var flashSliderStatusValue = function(float){return (Math.round(float*10)/10).toString()+"ms"};
+    const flashSliderContainer = document.createElement("div");
+    flashSliderContainer.setAttribute("class", "sliderContainer");
+    var flashSlider = document.createElement("input");
+    flashSlider.setAttribute("type", "range");
+    flashSlider.setAttribute("min", "0");
+    flashSlider.setAttribute("max", "500");
+    flashSlider.setAttribute("step", "0.1");
+    flashSlider.value = getStorage("flashSlider", 66.7);
+    flashSliderContainer.appendChild(flashSlider);
+    var flashSliderStatus = document.createElement("div");
+    flashSliderStatus.setAttribute("class", "sliderStatus");
+    flashSliderStatus.innerHTML = flashSliderStatusValue(flashSlider.value);
+    flashSliderContainer.appendChild(flashSliderStatus);
+    controlsContainer.appendChild(flashSliderContainer);
+
+    var updateFlashSlider = function(event) {
+      if(typeof event !== "boolean" || event === true)
+      {
+        setStorage("flashSlider", flashSlider.value);
+      }
+      flashSliderStatus.innerHTML = flashSliderStatusValue(flashSlider.value);
+    };
+    flashSlider.addEventListener("change", updateFlashSlider);
+    flashSlider.addEventListener("input", updateFlashSlider);
+
     if(typeof App === "object" && typeof App.centerOn === "function")
     {
-      controlsContainer.appendChild(document.createElement("br"));
+      //controlsContainer.appendChild(document.createElement("br"));
       const coordinateButton = document.createElement("input");
       coordinateButton.setAttribute("type", "button");
       coordinateButton.setAttribute("value", getString("jump-to-coordinates"));
@@ -273,35 +337,6 @@
     }
 
     templateContainer.appendChild(controlsContainer);
-
-    var sliderStatusValue = function(float){return (Math.round(float*1000)/10).toString()+"%"};
-
-    const sliderContainer = document.createElement("div");
-    sliderContainer.setAttribute("class", "sliderContainer");
-    var slider = document.createElement("input");
-    slider.setAttribute("type", "range");
-    slider.setAttribute("min", "0");
-    slider.setAttribute("max", "1");
-    slider.setAttribute("step", "0.01");
-    slider.value = img.style.opacity;
-    sliderContainer.appendChild(slider);
-    var sliderStatus = document.createElement("div");
-    sliderStatus.setAttribute("class", "sliderStatus");
-    sliderStatus.innerHTML = sliderStatusValue(slider.value);
-    sliderContainer.appendChild(sliderStatus);
-    templateContainer.appendChild(sliderContainer);
-
-    var updateSlider = function(event) {
-      if(typeof event !== "boolean" || event === true)
-      {
-        setStorage("slider", slider.value);
-      }
-      sliderStatus.innerHTML = sliderStatusValue(slider.value);
-      img.style.opacity = slider.value;
-    };
-
-    slider.addEventListener("change", updateSlider);
-    slider.addEventListener("input", updateSlider);
 
     var updateTemplate = function(event) {
       if(typeof event !== "boolean" || event === true)
@@ -322,7 +357,8 @@
           setStorage("flash", flashCheckbox.checked);
         }
         templateCheckbox.disabled = true;
-        flashInterval = window.setInterval(function(){if(flashCheckbox.checked){templateCheckbox.checked=!templateCheckbox.checked; updateTemplate(false);}}, 1000/15);
+        flashSlider.disabled = true;
+        flashInterval = window.setInterval(function(){if(flashCheckbox.checked){templateCheckbox.checked=!templateCheckbox.checked; updateTemplate(false);}}, flashSlider.value);
       }
       else
       {
@@ -333,6 +369,7 @@
           setStorage("flash", flashCheckbox.checked);
         }
         templateCheckbox.disabled = false;
+        flashSlider.disabled = false;
         updateTemplate();
       }
     }
@@ -352,13 +389,13 @@
         updateFlash();
         break;
         case 189: /* - */
-        slider.value = parseFloat(slider.value)-0.05;
-        updateSlider();
+        templateSlider.value = parseFloat(templateSlider.value)-0.05;
+        updateTemplateSlider();
         break;
 
         case 187: /* + */
-        slider.value = parseFloat(slider.value)+0.05;
-        updateSlider();
+        templateSlider.value = parseFloat(templateSlider.value)+0.05;
+        updateTemplateSlider();
         break;
 
         case 74: /* J */
@@ -370,7 +407,7 @@
       }
     });
 
-    updateSlider(false);
+    updateTemplateSlider(false);
     updateTemplate(false);
     updateFlash(false);
     if(typeof App === "object" && typeof App.centerOn === "function" && templateCheckbox.checked && (params.ox !== 0 || params.oy !== 0))

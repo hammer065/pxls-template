@@ -10,7 +10,7 @@
   image-rendering: optimize-contrast;
   -ms-interpolation-mode: nearest-neighbor;
 }
-#tempcontainer {
+#templateContainer {
   bottom: 63px;
   right: 0px;
   position: fixed;
@@ -23,54 +23,54 @@
   -o-box-shadow: 0px 0px 15px 0px #161618;
   box-shadow: 0px 0px 15px 0px #161618;
 }
-#tempcontainer.notemplateurl {
+#templateContainer.notemplateurl {
   -webkit-animation: fadeInOut 5s forwards;
   -moz-animation: fadeInOut 5s forwards;
   -ms-animation: fadeInOut 5s forwards;
   -o-animation: fadeInOut 5s forwards;
   animation: fadeInOut 5s forwards;
 }
-#tempcontainer .pr0Logo {
+#templateContainer .pr0Logo {
   width: 19px;
   height: 19px;
   vertical-align: bottom;
 }
-#tempcontainer .pr0User {
+#templateContainer .pr0User {
   width: 11px;
   height: 11px;
   margin: 0px 2px;
   vertical-align: bottom;
 }
-#tempcontainer .notification {
+#templateContainer .notification {
   font-size: 150%;
   color: #D23C22;
   text-align: center;
   padding: 10px;
 }
-#tempcontainer .checkboxLabel {
+#templateContainer .checkboxLabel {
   font-size: 0.75em;
 }
-#tempcontainer .version {
+#templateContainer .version {
   color: #aaaaaa;
   font-size: 0.75em;
 }
-#tempcontainer .controlsContainer {
-  margin-top: 11px;
+#templateContainer .controlsContainer {
+  margin: 11px 0px;
 }
-#tempcontainer .sliderContainer {
-  margin: 10px 0;
+#templateContainer .sliderContainer {
+  margin: 10px 0px;
 }
-#tempcontainer .sliderStatus {
+#templateContainer .sliderStatus {
   text-align: center;
   font-size: 0.75em;
 }
-#tempcontainer .creditContainer {
+#templateContainer .creditContainer {
   clear: both;
   font-size: 0.5em;
   color: #aaaaaa;
   text-align: right;
 }
-#tempcontainer input[type=button], #tempcontainer input[type=submit] {
+#templateContainer input[type=button], #templateContainer input[type=submit] {
   font-weight: normal;
   display: inline-block;
   text-align: center;
@@ -83,22 +83,25 @@
   -webkit-appearance: none;
   appearance: none;
 }
-#tempcontainer input[type=button]:hover, #tempcontainer input[type=button]:focus, #tempcontainer input[type=submit]:hover, #tempcontainer input[type=submit]:focus {
+#templateContainer input[type=button]:hover, #templateContainer input[type=button]:focus, #templateContainer input[type=submit]:hover, #templateContainer input[type=submit]:focus {
   outline: none;
   text-shadow: none;
   color: #555;
   background-color: #F5F7F6;
 }
-#tempcontainer input[type=range] {
+#templateContainer input[type=range] {
   -webkit-appearance: none;
   width: 100%;
   padding: 8px 16px;
   background-color: #161618;
 }
-#tempcontainer input[type=range]:focus {
+#templateContainer input[type=range]:disabled {
+  cursor: default;
+}
+#templateContainer input[type=range]:focus {
   outline: none;
 }
-#tempcontainer input[type=range]::-webkit-slider-runnable-track {
+#templateContainer input[type=range]::-webkit-slider-runnable-track {
   width: 100%;
   height: 5px;
   cursor: pointer;
@@ -108,7 +111,11 @@
   border-radius: 5px;
   border: 0px solid #000000;
 }
-#tempcontainer input[type=range]::-webkit-slider-thumb {
+#templateContainer input[type=range]:disabled::-webkit-slider-runnable-track {
+  background-color: #444444;
+  cursor: default;
+}
+#templateContainer input[type=range]::-webkit-slider-thumb {
   box-shadow: 0px 0px 0px #000000;
   border: 1px solid #D23C22;
   height: 18px;
@@ -121,10 +128,15 @@
   -webkit-transition: background-color 0.25s ease-in-out;
   transition: background-color 0.25s ease-in-out;
 }
-#tempcontainer input[type=range]:hover::-webkit-slider-thumb {
+#templateContainer input[type=range]:hover::-webkit-slider-thumb {
   background-color: #D23C22;
 }
-#tempcontainer input[type=range]::-moz-range-track {
+#templateContainer input[type=range]:disabled::-webkit-slider-thumb {
+  border: 1px solid #444444;
+  background-color: #444444;
+  cursor: default;
+}
+#templateContainer input[type=range]::-moz-range-track {
   width: 100%;
   height: 5px;
   cursor: pointer;
@@ -134,7 +146,11 @@
   border-radius: 5px;
   border: 0px solid #000000;
 }
-#tempcontainer input[type=range]::-moz-range-thumb {
+#templateContainer input[type=range]:disabled::-moz-range-track {
+  background-color: #444444;
+  cursor: default;
+}
+#templateContainer input[type=range]::-moz-range-thumb {
   box-shadow: 0px 0px 0px #000000;
   border: 1px solid #D23C22;
   height: 18px;
@@ -145,10 +161,15 @@
   -moz-transition: background-color 0.25s ease-in-out;
   transition: background-color 0.25s ease-in-out;
 }
-#tempcontainer input[type=range]:hover::-moz-range-thumb {
+#templateContainer input[type=range]:hover::-moz-range-thumb {
   background-color: #D23C22;
 }
-#tempcontainer input[type=range]::-ms-track {
+#templateContainer input[type=range]:disabled::-moz-range-thumb {
+  background-color: #444444;
+  border: 1px solid #444444;
+  cursor: default;
+}
+#templateContainer input[type=range]::-ms-track {
   width: 100%;
   height: 5px;
   cursor: pointer;
@@ -157,19 +178,28 @@
   border-color: transparent;
   color: transparent;
 }
-#tempcontainer input[type=range]::-ms-fill-lower {
+#templateContainer input[type=range]:disabled::-ms-track {
+  cursor: default;
+}
+#templateContainer input[type=range]::-ms-fill-lower {
   background-color: #D23C22;
   border: 0px solid #000000;
   border-radius: 10px;
   box-shadow: 0px 0px 0px #000000;
 }
-#tempcontainer input[type=range]::-ms-fill-upper {
+#templateContainer input[type=range]:disabled::-ms-fill-lower {
+  background-color: #444444;
+}
+#templateContainer input[type=range]::-ms-fill-upper {
   background-color: #D23C22;
   border: 0px solid #000000;
   border-radius: 10px;
   box-shadow: 0px 0px 0px #000000;
 }
-#tempcontainer input[type=range]::-ms-thumb {
+#templateContainer input[type=range]:disabled::-ms-fill-upper {
+  background-color: #444444;
+}
+#templateContainer input[type=range]::-ms-thumb {
   box-shadow: 0px 0px 0px #000000;
   border: 1px solid #D23C22;
   height: 18px;
@@ -180,8 +210,12 @@
   -ms-transition: background-color 0.25s ease-in-out;
   transition: background-color 0.25s ease-in-out;
 }
-#tempcontainer input[type=range]:hover::-ms-thumb {
+#templateContainer input[type=range]:hover::-ms-thumb {
   background-color: #D23C22;
+}
+#templateContainer input[type=range]:disabled::-ms-thumb {
+  background-color: #444444;
+  cursor: default;
 }
 @keyframes fadeInOut {
   0% {
