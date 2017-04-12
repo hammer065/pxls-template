@@ -215,8 +215,8 @@
       console.log(getString("no-oy"));
       params.oy = 0;
     }
-    img.style.top = (params.ox.toString()+"px");
-    img.style.left = (params.oy.toString()+"px");
+    img.style.top = (params.oy.toString()+"px");
+    img.style.left = (params.ox.toString()+"px");
     img.style.width = (typeof params.tw !== "undefined")?(params.tw.toString()+"px"):undefined;
     try {
       img.style.imageRendering = "pixelated";
