@@ -3,7 +3,7 @@
 // @namespace    pr0
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.3.5
+// @version      0.3.6
 // @description  Es ist Zeit für Reich
 // @author       Endrik, schrej and >_hammer065
 // @match        http://pxls.space/*
@@ -49,7 +49,7 @@
   {
     version = GM_info.script.version;
   }
-  templateContainer.innerHTML = '<img src="'+baseURL+'pr0gramm-logo.svg" class="pr0Logo"><span>&gt;_</span> Template'+(version!==""?(' <span class="version">v'+version.toString()+'</span>'):"")+'<br />';
+  templateContainer.innerHTML = '<img src="'+baseURL+'pr0gramm-logo.svg" class="pr0Logo"> Template'+(version!==""?(' <span class="version">v'+version.toString()+'</span>'):"")+'<br />';
 
   if(typeof params.template !== "undefined")
   {

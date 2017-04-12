@@ -23,4 +23,4 @@ Contributors
  - `hammer065`: Me, who did the last major changes to the UserScript
 
 
-*The logo pr0gramm-logo.svg is owned by the respective creator at pr0gramm.com*
+*The logo* `pr0gramm-logo.svg` *is owned by the respective creator at pr0gramm.com*
