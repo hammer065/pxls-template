@@ -34,6 +34,7 @@
 #tempcontainer .pr0User {
   width: 9px;
   height: 9px;
+  margin: 0px 2px;
   vertical-align: bottom;
 }
 #tempcontainer .notification {
