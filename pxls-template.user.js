@@ -34,7 +34,7 @@
   const styleElement = document.createElement("link");
   styleElement.setAttribute("rel", "stylesheet");
   styleElement.setAttribute("type", "text/css");
-  styleElement.setAttribute("href", "https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.css");
+  styleElement.setAttribute("href", "https://cdn.rawgit.com/hammer065/pxls-template/master/pxls-template.css");
   document.head.appendChild(styleElement);
 
   const templateContainer = document.createElement("div");
