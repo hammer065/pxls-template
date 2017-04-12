@@ -2,7 +2,7 @@
 // @name         pxls.space pr0 template
 // @namespace    pr0
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
-// @version      0.3.3
+// @version      0.3.4
 // @description  Es ist Zeit für Reich
 // @author       Endrik, schrej and >_hammer065
 // @match        http://pxls.space/*
