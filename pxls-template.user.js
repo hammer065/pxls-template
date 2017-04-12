@@ -182,7 +182,7 @@
   else
   {
     templateContainer.setAttribute("class", "notemplateurl");
-    templateContainer.innerHTML += '<br /><div class="notification">No Template-URL passed</div>';
+    templateContainer.innerHTML += '<div class="notification">No Template-URL passed</div>';
     console.log("No Template-URL passed");
   }
 
