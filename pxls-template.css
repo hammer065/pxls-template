@@ -54,8 +54,8 @@
   color: #aaaaaa;
   font-size: 0.75em;
 }
-#tempcontainer .checkboxContainer {
-  margin: 11px 0px;
+#tempcontainer .controlsContainer {
+  margin-top: 11px;
 }
 #tempcontainer .sliderContainer {
   margin: 10px 0;
@@ -69,6 +69,25 @@
   font-size: 0.5em;
   color: #aaaaaa;
   text-align: right;
+}
+#tempcontainer input[type=button], #tempcontainer input[type=submit] {
+  font-weight: normal;
+  display: inline-block;
+  text-align: center;
+  padding: 5px;
+  color: #F5F7F6;
+  cursor: pointer;
+  background-color: #ee4d2e;
+  margin: 3px 0px;
+  border: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+#tempcontainer input[type=button]:hover, #tempcontainer input[type=button]:focus, #tempcontainer input[type=submit]:hover, #tempcontainer input[type=submit]:focus {
+  outline: none;
+  text-shadow: none;
+  color: #555;
+  background-color: #F5F7F6;
 }
 #tempcontainer input[type=range] {
   -webkit-appearance: none;

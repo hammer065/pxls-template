@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.4.5
+// @version      0.4.6
 // @description  Es ist Zeit für Reich
 // @author       Endrik, schrej and >_hammer065
 // @match        http://pxls.space/*
@@ -29,11 +29,14 @@
         "url-passed":"Template-URL \"%0\" angegeben",
         "no-ox":"Kein ox Parameter angegeben. Setze auf 0",
         "no-oy":"Kein oy Parameter angegeben. Setze auf 0",
-        "template-label":"Template umschalten [T]",
-        "flash-label":"Flash umschalten [F]",
+        "template-label":"Template anzeigen [T]",
+        "flash-label":"Template flashen lassen [F]",
         "credits":('von Endrik, schrej und <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
         "time-for-reich":"Es ist Zeit für Reich!",
-        "invalid-storage-key":"Ungültiger Storagename!"
+        "invalid-storage-key":"Ungültiger Storagename!",
+        "prompt-x-coord":"Bitte gib die X-Koordinate ein, zu der du springen willst:",
+        "prompt-y-coord":"Bitte gib die Y-Koordinate ein, zu der du springen willst:",
+        "jump-to-coordinates":"Springe zu Koordinaten [J]"
       },
       "en":{
         "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template'),
@@ -41,11 +44,14 @@
         "url-passed":"Template-URL \"%0\" passed",
         "no-ox":"No ox parameter passed. Setting to 0",
         "no-oy":"No oy parameter passed. Setting to 0",
-        "template-label":"Toggle Template [T]",
-        "flash-label":"Toggle Flash [F]",
+        "template-label":"Show Template [T]",
+        "flash-label":"Flash Template [F]",
         "credits":('by Endrik, schrej and <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
         "time-for-reich":"It's time for Reich!",
-        "invalid-storage-key":"Invalid storage key!"
+        "invalid-storage-key":"Invalid storage key!",
+        "prompt-x-coord":"Please enter the X-coordinate you want to jump to:",
+        "prompt-y-coord":"Please enter the Y-coordinate you want to jump to:",
+        "jump-to-coordinates":"Jump to Coordinates [J]"
       }
     }
     if(typeof string !== "string")
@@ -141,6 +147,19 @@
     }
   }, parseBool = function(bool) {
     return (bool === "true" || bool === true || bool === 1);
+  }, askCoordinate = function() {
+    if(typeof window.prompt === "function")
+    {
+      var x = window.prompt(getString("prompt-x-coord"));
+      if(x !== null)
+      {
+        var y = window.prompt(getString("prompt-y-coord"));
+        if(y !== null)
+        {
+          App.centerOn(x, y);
+        }
+      }
+    }
   };
 
   var version = "";
@@ -217,35 +236,43 @@
     if (!boardMover) return;
     boardMover.appendChild(img);
 
-    const checkboxContainer = document.createElement("div");
-    checkboxContainer.setAttribute("class", "checkboxContainer");
-
-    const brElement = document.createElement("br");
+    const controlsContainer = document.createElement("div");
+    controlsContainer.setAttribute("class", "controlsContainer");
 
     const templateCheckbox = document.createElement("input");
     templateCheckbox.setAttribute("type", "checkbox");
     templateCheckbox.setAttribute("id", "templateCheckbox");
     templateCheckbox.checked = parseBool(getStorage("template", true));
-    checkboxContainer.appendChild(templateCheckbox);
+    controlsContainer.appendChild(templateCheckbox);
     const templateCheckboxLabel = document.createElement("label");
     templateCheckboxLabel.setAttribute("for", "templateCheckbox");
     templateCheckboxLabel.setAttribute("class", "checkboxLabel");
     templateCheckboxLabel.innerHTML = ("&nbsp;"+getString("template-label"));
-    checkboxContainer.appendChild(templateCheckboxLabel);
-    checkboxContainer.appendChild(brElement);
+    controlsContainer.appendChild(templateCheckboxLabel);
 
+    controlsContainer.appendChild(document.createElement("br"));
     const flashCheckbox = document.createElement("input");
     flashCheckbox.setAttribute("type", "checkbox");
     flashCheckbox.setAttribute("id", "flashCheckbox");
     flashCheckbox.checked = parseBool(getStorage("flash", false));
-    checkboxContainer.appendChild(flashCheckbox);
+    controlsContainer.appendChild(flashCheckbox);
     const flashCheckboxLabel = document.createElement("label");
     flashCheckboxLabel.setAttribute("for", "flashCheckbox");
     flashCheckboxLabel.setAttribute("class", "checkboxLabel");
     flashCheckboxLabel.innerHTML = ("&nbsp;"+getString("flash-label"));
-    checkboxContainer.appendChild(flashCheckboxLabel);
+    controlsContainer.appendChild(flashCheckboxLabel);
 
-    templateContainer.appendChild(checkboxContainer);
+    if(typeof App === "object" && typeof App.centerOn === "function")
+    {
+      controlsContainer.appendChild(document.createElement("br"));
+      const coordinateButton = document.createElement("input");
+      coordinateButton.setAttribute("type", "button");
+      coordinateButton.setAttribute("value", getString("jump-to-coordinates"));
+      coordinateButton.onclick = askCoordinate;
+      controlsContainer.appendChild(coordinateButton);
+    }
+
+    templateContainer.appendChild(controlsContainer);
 
     var sliderStatusValue = function(float){return (Math.round(float*1000)/10).toString()+"%"};
 
@@ -332,6 +359,13 @@
         case 187: /* + */
         slider.value = parseFloat(slider.value)+0.05;
         updateSlider();
+        break;
+
+        case 74: /* J */
+        if(typeof App === "object" && typeof App.centerOn === "function")
+        {
+          askCoordinate();
+        }
         break;
       }
     });
