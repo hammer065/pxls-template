@@ -17,6 +17,9 @@
 
 (function () {
   'use strict';
+
+  const baseURL = "https://cdn.rawgit.com/hammer065/pxls-template/master/";
+
   function toHtml(str) {
     var htmlObject = document.createElement('div');
     htmlObject.innerHTML = str;
@@ -35,7 +38,7 @@
   const styleElement = document.createElement("link");
   styleElement.setAttribute("rel", "stylesheet");
   styleElement.setAttribute("type", "text/css");
-  styleElement.setAttribute("href", "https://cdn.rawgit.com/hammer065/pxls-template/master/pxls-template.css");
+  styleElement.setAttribute("href", baseURL+"pxls-template.css");
   document.head.appendChild(styleElement);
 
   const templateContainer = document.createElement("div");
@@ -46,7 +49,7 @@
   {
     version = GM_info.script.version;
   }
-  templateContainer.innerHTML = '<span>&gt;_</span> Template'+(version!==""?(' <span class="version">v'+version.toString()+'</span>'):"")+'<br />';
+  templateContainer.innerHTML = '<img src="'+baseURL+'pr0gramm-logo.svg" class="pr0Logo"><span>&gt;_</span> Template'+(version!==""?(' <span class="version">v'+version.toString()+'</span>'):"")+'<br />';
 
   if(typeof params.template !== "undefined")
   {
@@ -184,7 +187,7 @@
 
   const creditContainer = document.createElement("div");
   creditContainer.setAttribute("class", "creditContainer");
-  creditContainer.innerHTML = "by Endrik, schrej and &gt;_hammer065";
+  creditContainer.innerHTML = 'by Endrik, schrej and <img src="'+baseURL+'pr0gramm-logo.svg" class="pr0User">hammer065';
   templateContainer.appendChild(creditContainer);
 
   uiContainer.appendChild(templateContainer);

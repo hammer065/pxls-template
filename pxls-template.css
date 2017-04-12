@@ -26,6 +26,16 @@
   -o-animation: fadeInOut 5s forwards;
   animation: fadeInOut 5s forwards;
 }
+#tempcontainer .pr0Logo {
+  width: 19px;
+  height: 19px;
+  vertical-align: bottom;
+}
+#tempcontainer .pr0User {
+  width: 9px;
+  height: 9px;
+  vertical-align: bottom;
+}
 #tempcontainer .notification {
   font-size: 150%;
   color: #D23C22;
