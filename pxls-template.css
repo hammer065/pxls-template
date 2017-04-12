@@ -1,9 +1,14 @@
 #overlayImage {
   position: absolute;
-  top: 0px;
-  left: 0px;
   z-index: 5;
   pointer-events: none;
+  image-rendering: optimizeSpeed;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -o-crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: pixelated;
+  image-rendering: optimize-contrast;
+  -ms-interpolation-mode: nearest-neighbor;
 }
 #tempcontainer {
   bottom: 63px;
@@ -43,11 +48,11 @@
   padding: 10px;
 }
 #tempcontainer .checkboxLabel {
-  font-size: 75%;
+  font-size: 0.75em;
 }
 #tempcontainer .version {
   color: #aaaaaa;
-  font-size: 75%;
+  font-size: 0.75em;
 }
 #tempcontainer .checkboxContainer {
   margin: 11px 0px;
@@ -57,11 +62,11 @@
 }
 #tempcontainer .sliderStatus {
   text-align: center;
-  font-size: 75%;
+  font-size: 0.75em;
 }
 #tempcontainer .creditContainer {
   clear: both;
-  font-size: 25%;
+  font-size: 0.5em;
   color: #aaaaaa;
   text-align: right;
 }
