@@ -2,8 +2,7 @@ pxls-template
 =============
 A UserScript to make a template overlay over the main canvas, so users can pixel big graphics together more easily
 
--------------
-
+----------
 
 Usage
 -----
@@ -14,6 +13,7 @@ Usage
  - `X`: *Optional*, an offset on the x-axis to position the image on the canvas, defaults to 0.
  - `Y`: *Optional*, an offset on the y-axis to position the image on the canvas, defaults to 0.
  - `W`: *Optional*, sets a custom width to the image. Useful, if the image is not pixel-sized.
+
 Unused parameters should get omitted, for example: `https://pxls.space/?template=URL` is the valid format if you just want to specify the image URL.
 
 Contributors
