@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.4.1
+// @version      0.4.3
 // @description  Es ist Zeit für Reich
 // @author       Endrik, schrej and >_hammer065
 // @match        http://pxls.space/*
@@ -134,7 +134,7 @@
     var img = document.createElement("img");
     img.src = params.template;
     img.id = "overlayImage";
-    img.style.opacity = 0.5;
+    img.style.opacity = ((typeof window.localStorage !== "undefined" && typeof localStorage["pxls-template.slider"] !== "undefined")?localStorage["pxls-template.slider"]:0.5);
     if(typeof params.ox === "undefined")
     {
       console.log(getString("no-ox"));
@@ -213,15 +213,19 @@
     sliderContainer.appendChild(sliderStatus);
     templateContainer.appendChild(sliderContainer);
 
-    var updateSlider = function (event) {
+    var updateSlider = function(event) {
       sliderStatus.innerHTML = sliderStatusValue(slider.value);
       img.style.opacity = slider.value;
+      if(typeof window.localStorage !== "undefined")
+      {
+        localStorage["pxls-template.slider"] = slider.value;
+      }
     };
 
     slider.addEventListener("change", updateSlider);
     slider.addEventListener("input", updateSlider);
 
-    var setVisibility = function (event) {
+    var setVisibility = function(event) {
       img.style.visibility = templateCheckbox.checked?"visible":"hidden";
     };
 
@@ -230,12 +234,14 @@
       if(flashCheckbox.checked)
       {
         flashOldTemplate = templateCheckbox.checked;
+        templateCheckbox.disabled = true;
         flashInterval = window.setInterval(function(){if(flashCheckbox.checked){templateCheckbox.checked=!templateCheckbox.checked; setVisibility();}}, 1000/15);
       }
       else
       {
         window.clearInterval(flashInterval);
         templateCheckbox.checked = flashOldTemplate;
+        templateCheckbox.disabled = false;
         setVisibility();
       }
     }
