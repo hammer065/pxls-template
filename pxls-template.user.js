@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.4.3
+// @version      0.4.5
 // @description  Es ist Zeit für Reich
 // @author       Endrik, schrej and >_hammer065
 // @match        http://pxls.space/*
@@ -18,6 +18,7 @@
 
 (function () {
   'use strict';
+  const storagePrefix = "pxls-template.";
 
   var getString = function(string, args, language) {
     var output = "";
@@ -31,7 +32,8 @@
         "template-label":"Template umschalten [T]",
         "flash-label":"Flash umschalten [F]",
         "credits":('von Endrik, schrej und <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
-        "time-for-reich":"Es ist Zeit für Reich!"
+        "time-for-reich":"Es ist Zeit für Reich!",
+        "invalid-storage-key":"Ungültiger Storagename!"
       },
       "en":{
         "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template'),
@@ -42,7 +44,8 @@
         "template-label":"Toggle Template [T]",
         "flash-label":"Toggle Flash [F]",
         "credits":('by Endrik, schrej and <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
-        "time-for-reich":"It's time for Reich!"
+        "time-for-reich":"It's time for Reich!",
+        "invalid-storage-key":"Invalid storage key!"
       }
     }
     if(typeof string !== "string")
@@ -90,7 +93,55 @@
     {
       return string.toString().toUpperCase();
     }
-  }
+  }, getStorage = function(key, fallback) {
+    if(typeof key !== "string")
+    {
+      console.warn(getString("invalid-storage-key"));
+      return;
+    }
+    if(typeof window.localStorage !== "undefined" && typeof localStorage[(storagePrefix+key.toString())] !== "undefined")
+    {
+      return localStorage[(storagePrefix+key.toString())];
+    }
+    else
+    {
+      console.log(getString("no-localstorage"));
+      if(typeof fallback !== "undefined")
+      {
+        return fallback;
+      }
+      else
+      {
+        return;
+      }
+    }
+  }, setStorage = function(key, value) {
+    if(typeof key !== "string")
+    {
+      console.warn(getString("invalid-storage-key"));
+      return;
+    }
+    if(typeof window.localStorage !== "undefined")
+    {
+      if(typeof value === "undefined")
+      {
+        localStorage.removeItem(storagePrefix+key.toString());
+        return;
+      }
+      else
+      {
+        localStorage[(storagePrefix+key.toString())] = value;
+        return value;
+      }
+    }
+    else
+    {
+      console.warn(getString("no-localstorage"));
+      return;
+    }
+  }, parseBool = function(bool) {
+    return (bool === "true" || bool === true || bool === 1);
+  };
 
   var version = "";
   if(typeof GM_info !== "undefined" && typeof GM_info.script !== "undefined" && typeof GM_info.script.version !== "undefined")
@@ -134,7 +185,7 @@
     var img = document.createElement("img");
     img.src = params.template;
     img.id = "overlayImage";
-    img.style.opacity = ((typeof window.localStorage !== "undefined" && typeof localStorage["pxls-template.slider"] !== "undefined")?localStorage["pxls-template.slider"]:0.5);
+    img.style.opacity = getStorage("slider", 0.5);
     if(typeof params.ox === "undefined")
     {
       console.log(getString("no-ox"));
@@ -174,7 +225,7 @@
     const templateCheckbox = document.createElement("input");
     templateCheckbox.setAttribute("type", "checkbox");
     templateCheckbox.setAttribute("id", "templateCheckbox");
-    templateCheckbox.checked = true;
+    templateCheckbox.checked = parseBool(getStorage("template", true));
     checkboxContainer.appendChild(templateCheckbox);
     const templateCheckboxLabel = document.createElement("label");
     templateCheckboxLabel.setAttribute("for", "templateCheckbox");
@@ -186,7 +237,7 @@
     const flashCheckbox = document.createElement("input");
     flashCheckbox.setAttribute("type", "checkbox");
     flashCheckbox.setAttribute("id", "flashCheckbox");
-    flashCheckbox.checked = false;
+    flashCheckbox.checked = parseBool(getStorage("flash", false));
     checkboxContainer.appendChild(flashCheckbox);
     const flashCheckboxLabel = document.createElement("label");
     flashCheckboxLabel.setAttribute("for", "flashCheckbox");
@@ -214,47 +265,60 @@
     templateContainer.appendChild(sliderContainer);
 
     var updateSlider = function(event) {
+      if(typeof event !== "boolean" || event === true)
+      {
+        setStorage("slider", slider.value);
+      }
       sliderStatus.innerHTML = sliderStatusValue(slider.value);
       img.style.opacity = slider.value;
-      if(typeof window.localStorage !== "undefined")
-      {
-        localStorage["pxls-template.slider"] = slider.value;
-      }
     };
 
     slider.addEventListener("change", updateSlider);
     slider.addEventListener("input", updateSlider);
 
-    var setVisibility = function(event) {
+    var updateTemplate = function(event) {
+      if(typeof event !== "boolean" || event === true)
+      {
+        setStorage("template", templateCheckbox.checked);
+      }
       img.style.visibility = templateCheckbox.checked?"visible":"hidden";
     };
 
-    var flashInterval = 0, flashOldTemplate = true;
+    var flashInterval = -1, flashOldTemplate = templateCheckbox.checked;
     var updateFlash = function(event) {
       if(flashCheckbox.checked)
       {
         flashOldTemplate = templateCheckbox.checked;
+        if(typeof event !== "boolean" || event === true)
+        {
+          setStorage("template", templateCheckbox.checked);
+          setStorage("flash", flashCheckbox.checked);
+        }
         templateCheckbox.disabled = true;
-        flashInterval = window.setInterval(function(){if(flashCheckbox.checked){templateCheckbox.checked=!templateCheckbox.checked; setVisibility();}}, 1000/15);
+        flashInterval = window.setInterval(function(){if(flashCheckbox.checked){templateCheckbox.checked=!templateCheckbox.checked; updateTemplate(false);}}, 1000/15);
       }
       else
       {
         window.clearInterval(flashInterval);
         templateCheckbox.checked = flashOldTemplate;
+        if(typeof event !== "boolean" || event === true)
+        {
+          setStorage("flash", flashCheckbox.checked);
+        }
         templateCheckbox.disabled = false;
-        setVisibility();
+        updateTemplate();
       }
     }
     flashCheckbox.addEventListener("change", updateFlash);
 
-    templateCheckbox.addEventListener("change", setVisibility);
+    templateCheckbox.addEventListener("change", updateTemplate);
 
     document.addEventListener('keydown', function(event) {
       switch(event.keyCode)
       {
         case 84: /* T */
         templateCheckbox.checked = !templateCheckbox.checked;
-        setVisibility();
+        updateTemplate();
         break;
         case 70: /* F */
         flashCheckbox.checked = !flashCheckbox.checked;
@@ -271,6 +335,10 @@
         break;
       }
     });
+
+    updateSlider(false);
+    updateTemplate(false);
+    updateFlash(false);
   }
   else
   {
