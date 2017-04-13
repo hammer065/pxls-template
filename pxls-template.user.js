@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.5
+// @version      0.6
 // @description  Es ist Zeit für Reich
 // @author       Endrik, schrej and >_hammer065
 // @match        http://pxls.space/*
@@ -33,13 +33,19 @@
         "no-oy":"Kein oy Parameter angegeben. Setze auf 0",
         "template-label":"Template anzeigen [T]",
         "flash-label":"Template flashen lassen [F]",
-        "credits":('von Endrik, schrej und <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
+        "credits":('von <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
         "time-for-reich":"Es ist Zeit für Reich!",
         "invalid-storage-key":"Ungültiger Storagename!",
         "prompt-x-coord":"Bitte gib die X-Koordinate ein, zu der du springen willst:",
         "prompt-y-coord":"Bitte gib die Y-Koordinate ein, zu der du springen willst:",
         "jump-to-coordinates":"Springe zu Koordinaten [J]",
-        "ran-twice":"Anscheinend hast du das UserScript mehrfach installiert!\nBitte deinstalliere ALLE Versionen und installiere die Neueste!"
+        "ran-twice":"Anscheinend hast du das UserScript mehrfach installiert!\nBitte deinstalliere ALLE Versionen und installiere die Neueste!",
+        "start-recording":"Aufnahme starten",
+        "started-recording":"Aufnahme gestartet...",
+        "stop-recording":"Aufnahme stoppen (%0 Bilder aufgenommen)",
+        "stopped-recording":"Aufnahme bei %0 Bildern gestoppt",
+        "record-delay":"Bitte gib die Zeit in Sekunden an, die zwischen den Aufnahmen gewartet werden soll",
+        "record-times":"Bitte gib an, wie viele Aufnahmen du machen möchtest (0 für Unendlich)"
       },
       "en":{
         "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template'),
@@ -49,15 +55,21 @@
         "no-oy":"No oy parameter passed. Setting to 0",
         "template-label":"Show Template [T]",
         "flash-label":"Flash Template [F]",
-        "credits":('by Endrik, schrej and <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
+        "credits":('by <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
         "time-for-reich":"It's time for Reich!",
         "invalid-storage-key":"Invalid storage key!",
         "prompt-x-coord":"Please enter the X-coordinate you want to jump to:",
         "prompt-y-coord":"Please enter the Y-coordinate you want to jump to:",
         "jump-to-coordinates":"Jump to Coordinates [J]",
-        "ran-twice":"It seems that you've installed the UserScript multiply!\nPlease uninstall ALL versions and install the newest one!"
+        "ran-twice":"It seems that you've installed the UserScript multiply!\nPlease uninstall ALL versions and install the newest one!",
+        "start-recording":"Start Recording",
+        "started-recording":"Started recording...",
+        "stop-recording":"Stop Recording (%0 images recorded)",
+        "stopped-recording":"Stopped recording at %0 images",
+        "record-delay":"Please enter the delay between each image",
+        "record-times":"Please enter how many images you want to create (0 for infinite)"
       }
-    }
+    };
     if(typeof string !== "string")
     {
       console.error("No valid l18n string passed!");
@@ -167,7 +179,8 @@
   };
 
   const uniqueIDs = ["overlayImage", "templateContainer", "templateCheckbox", "flashCheckbox"];
-  for(var i=0; i<uniqueIDs.length; i++)
+  var i = 0;
+  for(i=0; i<uniqueIDs.length; i++)
   {
     if(document.getElementById(uniqueIDs[i]) !== null)
     {
@@ -193,7 +206,7 @@
 
   const query = window.location.search.substring(1).split('&');
   var params = {};
-  for(var i = 0; i<query.length; i++) {
+  for(i=0; i<query.length; i++) {
     var pair = query[i].split('=');
     params[decodeURIComponent(pair[0])] = (typeof pair[1] !== "undefined")?decodeURIComponent(pair[1]):true;
   }
@@ -262,7 +275,7 @@
     templateCheckboxLabel.innerHTML = ("&nbsp;"+getString("template-label"));
     controlsContainer.appendChild(templateCheckboxLabel);
 
-    var templateSliderStatusValue = function(float){return (Math.round(float*1000)/10).toString()+"%"};
+    var templateSliderStatusValue = function(float){return (Math.round(float*1000)/10).toString()+"%";};
     const templateSliderContainer = document.createElement("div");
     templateSliderContainer.setAttribute("class", "sliderContainer");
     var templateSlider = document.createElement("input");
@@ -300,7 +313,7 @@
     flashCheckboxLabel.innerHTML = ("&nbsp;"+getString("flash-label"));
     controlsContainer.appendChild(flashCheckboxLabel);
 
-    var flashSliderStatusValue = function(float){return (Math.round(float*10)/10).toString()+"ms"};
+    var flashSliderStatusValue = function(float){return (Math.round(float*10)/10).toString()+"ms";};
     const flashSliderContainer = document.createElement("div");
     flashSliderContainer.setAttribute("class", "sliderContainer");
     var flashSlider = document.createElement("input");
@@ -326,14 +339,63 @@
     flashSlider.addEventListener("change", updateFlashSlider);
     flashSlider.addEventListener("input", updateFlashSlider);
 
-    if(typeof App === "object" && typeof App.centerOn === "function")
+    if(typeof App === "object" && typeof App.centerOn === "function" && typeof window.prompt === "function")
     {
-      //controlsContainer.appendChild(document.createElement("br"));
       const coordinateButton = document.createElement("input");
       coordinateButton.setAttribute("type", "button");
       coordinateButton.setAttribute("value", getString("jump-to-coordinates"));
       coordinateButton.onclick = askCoordinate;
       controlsContainer.appendChild(coordinateButton);
+    }
+    if(typeof window.prompt === "function")
+    {
+      controlsContainer.appendChild(document.createElement("br"));
+      const recordButton = document.createElement("input");
+      recordButton.setAttribute("type", "button");
+      recordButton.setAttribute("value", getString("start-recording"));
+      var recordNbr = 0, recordInterval = -1, isRecording = false, recordTimes = parseInt(getStorage("recordTimes", 0)), recordDelay = parseFloat(getStorage("recordDelay", 10)), recordStop = function() {
+        window.clearInterval(recordInterval);
+        console.log(getString("stopped-recording", recordNbr));
+        recordButton.value = getString("start-recording");
+        recordNbr = 0;
+        isRecording = false;
+      }, recordLoop = function() {
+        var a = document.createElement("a");
+        a.href = App.elements.board[0].toDataURL("record/png");
+        a.download = "canvas_"+recordNbr+".png";
+        a.click();
+        recordButton.value = getString("stop-recording", ++recordNbr);
+        if(recordNbr > recordTimes && recordTimes != 0)
+        {
+          recordStop();
+        }
+      }, recordClick = function() {
+        if(isRecording)
+        {
+          recordStop();
+        }
+        else
+        {
+          var recDel = parseFloat(prompt(getString("record-delay"), recordDelay));
+          if(!isNaN(recDel))
+          {
+            recordDelay = recDel;
+            setStorage("recordDelay", recordDelay);
+            var recTimes = parseInt(prompt(getString("record-times"), recordTimes));
+            if(!isNaN(recTimes))
+            {
+              recordTimes = recTimes;
+              setStorage("recordTimes", recordTimes);
+              recordInterval = window.setInterval(recordLoop, (recordDelay*1000)),
+              console.log(getString("started-recording"));
+              recordButton.value = getString("stop-recording", recordNbr);
+              isRecording = true;
+            }
+          }
+        }
+      }
+      recordButton.onclick = recordClick;
+      controlsContainer.appendChild(recordButton);
     }
 
     templateContainer.appendChild(controlsContainer);
@@ -372,7 +434,7 @@
         flashSlider.disabled = false;
         updateTemplate();
       }
-    }
+    };
     flashCheckbox.addEventListener("change", updateFlash);
 
     templateCheckbox.addEventListener("change", updateTemplate);

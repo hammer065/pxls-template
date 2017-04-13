@@ -19,8 +19,8 @@ Unused parameters should get omitted, for example: `https://pxls.space/?template
 Contributors
 ------------
  - `Endrik`: Originally created the script on 4th of April 2017
- - `schrej`: Who fixed the script to make it work again and is still contributing
- - `hammer065`: Me, who did the last major changes to the UserScript
+ - `schrej`: Who fixed the script of `Endrik` to make it work again
+ - `hammer065`: Me, who is actively developing this UserScript
 
 
 *The logo* `pr0gramm-logo.svg` *is owned by the respective creator at pr0gramm.com*
