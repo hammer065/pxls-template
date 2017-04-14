@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.6.2
+// @version      0.6.3
 // @description  Es ist Zeit für Reich
 // @author       Endrik, schrej and >_hammer065
 // @match        http://pxls.space/*
@@ -18,6 +18,7 @@
 
 (function () {
   'use strict';
+  window.pxls_template = "";
   const storagePrefix = "pxls-template.";
   const baseURL = "https://rawgit.com/hammer065/pxls-template/master/";
   const baseStaticURL = "https://cdn.rawgit.com/hammer065/pxls-template/master/";
@@ -184,15 +185,20 @@
 
   const uniqueIDs = ["overlayImage", "templateContainer", "templateCheckbox", "flashCheckbox"];
   var i = 0;
+  if(!(delete window.pxls_template))
+  {
+    window.pxls_template = undefined;
+  }
   for(i=0; i<uniqueIDs.length; i++)
   {
-    if(document.getElementById(uniqueIDs[i]) !== null)
+    if(document.getElementById(uniqueIDs[i]) !== null || typeof window.pxls_template !== "undefined")
     {
       console.error(getString("ran-twice"));
       alert(getString("ran-twice"));
       return;
     }
   }
+  window.pxls_template = "";
 
   var version = "";
   if(typeof GM_info !== "undefined" && typeof GM_info.script !== "undefined" && typeof GM_info.script.version !== "undefined")
@@ -522,6 +528,9 @@
     window.setTimeout(focusLoop, 500);
   };
   focusLoop();
-
+  if(!(delete window.pxls_template))
+  {
+    window.pxls_template = undefined;
+  }
   console.log(getString("time-for-reich"));
 })();
