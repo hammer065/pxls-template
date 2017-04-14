@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.6.1
+// @version      0.6.2
 // @description  Es ist Zeit für Reich
 // @author       Endrik, schrej and >_hammer065
 // @match        http://pxls.space/*
@@ -46,7 +46,8 @@
         "stopped-recording":"Aufnahme bei %0 Bildern gestoppt",
         "record-delay":"Bitte gib die Zeit in Sekunden an, die zwischen den Aufnahmen gewartet werden soll",
         "record-times":"Bitte gib an, wie viele Aufnahmen du machen möchtest (0 für Unendlich)",
-        "no-localstorage":"LocalStorage ist nicht verfügbar. Einstellungen werden nicht gespeichert"
+        "no-localstorage":"LocalStorage ist nicht verfügbar. Einstellungen werden nicht gespeichert",
+        "false-focus":"Falsches Element fokussiert. Fokussiere body..."
       },
       "en":{
         "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template'),
@@ -69,7 +70,8 @@
         "stopped-recording":"Stopped recording at %0 images",
         "record-delay":"Please enter the delay between each image",
         "record-times":"Please enter how many images you want to create (0 for infinite)",
-        "no-localstorage":"LocalStorage is not available. Settings will not be saved"
+        "no-localstorage":"LocalStorage is not available. Settings will not be saved",
+        "false-focus":"Wrong element is focused. Focusing body..."
       }
     };
     if(typeof string !== "string")
@@ -341,25 +343,32 @@
     }
     if(typeof window.prompt === "function")
     {
+      /* ffmpeg -r 15 -start_number 2 -i canvas_%d.png -s 2000x2000 -vcodec libx264 limelapse.mp4 -frames 30 */
       controlsContainer.appendChild(document.createElement("br"));
       const recordButton = document.createElement("input");
       recordButton.setAttribute("type", "button");
       recordButton.setAttribute("value", getString("start-recording"));
-      var recordNbr = 0, recordInterval = -1, isRecording = false, recordTimes = parseInt(getStorage("recordTimes", 0)), recordDelay = parseFloat(getStorage("recordDelay", 10)), recordStop = function() {
-        window.clearInterval(recordInterval);
+      var recordNbr = 0, isRecording = false, recordTimes = parseInt(getStorage("recordTimes", 0)), recordDelay = parseFloat(getStorage("recordDelay", 10)), recordStop = function() {
         console.log(getString("stopped-recording", recordNbr));
         recordButton.value = getString("start-recording");
         recordNbr = 0;
         isRecording = false;
       }, recordLoop = function() {
-        var a = document.createElement("a");
-        a.href = App.elements.board[0].toDataURL("record/png");
-        a.download = "canvas_"+recordNbr+".png";
-        a.click();
-        recordButton.value = getString("stop-recording", ++recordNbr);
-        if(recordNbr > recordTimes && recordTimes != 0)
+        if(isRecording)
         {
-          recordStop();
+          var a = document.createElement("a");
+          a.href = App.elements.board[0].toDataURL("record/png");
+          a.download = "canvas_"+recordNbr+".png";
+          a.click();
+          recordButton.value = getString("stop-recording", ++recordNbr);
+          if(recordNbr > recordTimes && recordTimes !== 0)
+          {
+            recordStop();
+          }
+          else
+          {
+            window.setTimeout(recordLoop, (recordDelay*1000));
+          }
         }
       }, recordClick = function() {
         if(isRecording)
@@ -378,14 +387,14 @@
             {
               recordTimes = recTimes;
               setStorage("recordTimes", recordTimes);
-              recordInterval = window.setInterval(recordLoop, (recordDelay*1000)),
               console.log(getString("started-recording"));
               recordButton.value = getString("stop-recording", recordNbr);
               isRecording = true;
+              recordLoop();
             }
           }
         }
-      }
+      };
       recordButton.onclick = recordClick;
       controlsContainer.appendChild(recordButton);
     }
@@ -400,8 +409,15 @@
       img.style.visibility = templateCheckbox.checked?"visible":"hidden";
     };
 
-    var flashInterval = -1, flashOldTemplate = templateCheckbox.checked;
-    var updateFlash = function(event) {
+    var flashOldTemplate = templateCheckbox.checked;
+    var flashLoop = function() {
+      if(flashCheckbox.checked)
+      {
+        templateCheckbox.checked = !templateCheckbox.checked;
+        updateTemplate(false);
+        window.setTimeout(flashLoop, flashSlider.value);
+      }
+    }, updateFlash = function(event) {
       if(flashCheckbox.checked)
       {
         flashOldTemplate = templateCheckbox.checked;
@@ -412,11 +428,10 @@
         }
         templateCheckbox.disabled = true;
         flashSlider.disabled = true;
-        flashInterval = window.setInterval(function(){if(flashCheckbox.checked){templateCheckbox.checked=!templateCheckbox.checked; updateTemplate(false);}}, flashSlider.value);
+        flashLoop();
       }
       else
       {
-        window.clearInterval(flashInterval);
         templateCheckbox.checked = flashOldTemplate;
         if(typeof event !== "boolean" || event === true)
         {
@@ -482,6 +497,31 @@
   templateContainer.appendChild(creditContainer);
 
   uiContainer.appendChild(templateContainer);
+
+  if(!Date.now)
+  {
+    Date.now = function() { return (new Date().getTime()); };
+  }
+  document.body.setAttribute("tabindex", -1);
+  var focusLoop = function() {
+    if(App.cooldown > Date.now())
+    {
+      if(typeof document.activeElement !== "undefined")
+      {
+        if(document.activeElement !== document.body)
+        {
+          console.log(getString("false-focus"));
+          document.body.focus();
+        }
+      }
+      else
+      {
+        document.body.focus();
+      }
+    }
+    window.setTimeout(focusLoop, 500);
+  };
+  focusLoop();
 
   console.log(getString("time-for-reich"));
 })();
