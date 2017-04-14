@@ -45,7 +45,8 @@
         "stop-recording":"Aufnahme stoppen (%0 Bilder aufgenommen)",
         "stopped-recording":"Aufnahme bei %0 Bildern gestoppt",
         "record-delay":"Bitte gib die Zeit in Sekunden an, die zwischen den Aufnahmen gewartet werden soll",
-        "record-times":"Bitte gib an, wie viele Aufnahmen du machen möchtest (0 für Unendlich)"
+        "record-times":"Bitte gib an, wie viele Aufnahmen du machen möchtest (0 für Unendlich)",
+        "no-localstorage":"LocalStorage ist nicht verfügbar. Einstellungen werden nicht gespeichert"
       },
       "en":{
         "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template'),
@@ -67,7 +68,8 @@
         "stop-recording":"Stop Recording (%0 images recorded)",
         "stopped-recording":"Stopped recording at %0 images",
         "record-delay":"Please enter the delay between each image",
-        "record-times":"Please enter how many images you want to create (0 for infinite)"
+        "record-times":"Please enter how many images you want to create (0 for infinite)",
+        "no-localstorage":"LocalStorage is not available. Settings will not be saved"
       }
     };
     if(typeof string !== "string")
@@ -243,22 +245,12 @@
     img.style.top = (params.oy.toString()+"px");
     img.style.left = (params.ox.toString()+"px");
     img.style.width = (typeof params.tw !== "undefined")?(params.tw.toString()+"px"):undefined;
-    try {
-      img.style.imageRendering = "pixelated";
-      if(!img.style.imageRendering || img.style.imageRendering == "none")
-      {
-        img.style.imageRendering = "-moz-crisp-edges";
-      }
-      if(!img.style.imageRendering || img.style.imageRendering == "none")
-      {
-        img.style.imageRendering = "grisp-edges";
-      }
-    }
-    catch (e) {
-    }
 
     const boardMover = document.querySelector(".board-mover");
-    if (!boardMover) return;
+    if(!boardMover)
+    {
+      return;
+    }
     boardMover.appendChild(img);
 
     const controlsContainer = document.createElement("div");
@@ -319,7 +311,7 @@
     var flashSlider = document.createElement("input");
     flashSlider.setAttribute("type", "range");
     flashSlider.setAttribute("min", "0");
-    flashSlider.setAttribute("max", "500");
+    flashSlider.setAttribute("max", "1000");
     flashSlider.setAttribute("step", "0.1");
     flashSlider.value = getStorage("flashSlider", 66.7);
     flashSliderContainer.appendChild(flashSlider);
