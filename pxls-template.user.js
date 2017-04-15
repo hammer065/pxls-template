@@ -4,9 +4,9 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.6.3
+// @version      0.6.4
 // @description  Es ist Zeit für Reich
-// @author       Endrik, schrej and >_hammer065
+// @author       >_hammer065
 // @match        http://pxls.space/*
 // @match        https://pxls.space/*
 // @grant        none
@@ -77,7 +77,7 @@
     };
     if(typeof string !== "string")
     {
-      console.error("No valid l18n string passed!");
+      window.console.error("No valid l18n string passed!");
       return;
     }
     if(typeof args === "undefined")
@@ -93,18 +93,21 @@
     }
     if(typeof language !== "string")
     {
-      if(typeof window.navigator !== "undefined" && typeof navigator.language === "string")
+      if(typeof window.navigator !== "undefined" && typeof window.navigator.language === "string")
       {
-        language = navigator.language.split("-")[0];
+        language = window.navigator.language;
+        if(typeof l18n[language] === "undefined" || typeof l18n[language][string] === "undefined")
+        {
+          language = window.navigator.language.split("-")[0];
+        }
       }
       else
       {
         language = "en";
       }
     }
-    if(typeof l18n[language] === "undefined")
+    if(typeof l18n[language] === "undefined" || typeof l18n[language][string] === "undefined")
     {
-      console.warn("Unknown language \""+language.toString()+"\"! Setting to \"en\"");
       language = "en";
     }
     if(typeof l18n[language][string] !== "undefined")
@@ -118,21 +121,21 @@
     }
     else
     {
-      return string.toString().toUpperCase();
+      return "$"+string.toString().toUpperCase()+"$";
     }
   }, getStorage = function(key, fallback) {
     if(typeof key !== "string")
     {
-      console.warn(getString("invalid-storage-key"));
+      window.console.warn(getString("invalid-storage-key"));
       return;
     }
-    if(typeof window.localStorage !== "undefined" && typeof localStorage[(storagePrefix+key.toString())] !== "undefined")
+    if(typeof window.localStorage !== "undefined" && typeof window.localStorage[(storagePrefix+key.toString())] !== "undefined")
     {
-      return localStorage[(storagePrefix+key.toString())];
+      return window.localStorage[(storagePrefix+key.toString())];
     }
     else
     {
-      console.log(getString("no-localstorage"));
+      window.console.log(getString("no-localstorage"));
       if(typeof fallback !== "undefined")
       {
         return fallback;
@@ -145,25 +148,25 @@
   }, setStorage = function(key, value) {
     if(typeof key !== "string")
     {
-      console.warn(getString("invalid-storage-key"));
+      window.console.warn(getString("invalid-storage-key"));
       return;
     }
     if(typeof window.localStorage !== "undefined")
     {
       if(typeof value === "undefined")
       {
-        localStorage.removeItem(storagePrefix+key.toString());
+        window.localStorage.removeItem(storagePrefix+key.toString());
         return;
       }
       else
       {
-        localStorage[(storagePrefix+key.toString())] = value;
+        window.localStorage[(storagePrefix+key.toString())] = value;
         return value;
       }
     }
     else
     {
-      console.warn(getString("no-localstorage"));
+      window.console.warn(getString("no-localstorage"));
       return;
     }
   }, parseBool = function(bool) {
@@ -177,13 +180,13 @@
         var y = window.prompt(getString("prompt-y-coord"));
         if(y !== null)
         {
-          App.centerOn(x, y);
+          window.App.centerOn(x, y);
         }
       }
     }
   };
 
-  const uniqueIDs = ["overlayImage", "templateContainer", "templateCheckbox", "flashCheckbox"];
+  const uniqueIDs = ["overlayImage", "templateContainer", "templateCheckbox", "flashCheckbox", "tempcontainer", "slider-control"];
   var i = 0;
   if(!(delete window.pxls_template))
   {
@@ -191,9 +194,9 @@
   }
   for(i=0; i<uniqueIDs.length; i++)
   {
-    if(document.getElementById(uniqueIDs[i]) !== null || typeof window.pxls_template !== "undefined")
+    if(window.document.getElementById(uniqueIDs[i]) !== null || typeof window.pxls_template !== "undefined")
     {
-      console.error(getString("ran-twice"));
+      window.console.error(getString("ran-twice"));
       alert(getString("ran-twice"));
       return;
     }
@@ -206,10 +209,10 @@
     version = GM_info.script.version;
   }
 
-  console.log("pxls-template"+(version!==""?(" v"+version.toString()):""));
+  window.console.log("pxls-template"+(version!==""?(" v"+version.toString()):""));
 
   function toHtml(str) {
-    var htmlObject = document.createElement('div');
+    var htmlObject = window.document.createElement('div');
     htmlObject.innerHTML = str;
     return htmlObject.firstChild;
   }
@@ -221,71 +224,71 @@
     params[decodeURIComponent(pair[0])] = (typeof pair[1] !== "undefined")?decodeURIComponent(pair[1]):true;
   }
 
-  const uiContainer = document.querySelector(".ui");
+  const uiContainer = window.document.querySelector(".ui");
 
-  const styleElement = document.createElement("link");
+  const styleElement = window.document.createElement("link");
   styleElement.setAttribute("rel", "stylesheet");
   styleElement.setAttribute("type", "text/css");
   styleElement.setAttribute("href", baseURL+"pxls-template.css");
-  document.head.appendChild(styleElement);
+  window.document.head.appendChild(styleElement);
 
-  const templateContainer = document.createElement("div");
+  const templateContainer = window.document.createElement("div");
   templateContainer.setAttribute("id", "templateContainer");
   templateContainer.innerHTML = getString("title-name")+(version!==""?(' <span class="version">v'+version.toString()+'</span>'):"")+'<br />';
 
   if(typeof params.template !== "undefined")
   {
-    console.log(getString("url-passed", params.template.toString()));
-    var img = document.createElement("img");
+    window.console.log(getString("url-passed", params.template.toString()));
+    var img = window.document.createElement("img");
     img.src = params.template;
     img.id = "overlayImage";
     img.style.opacity = getStorage("templateSlider", 0.5);
     if(typeof params.ox === "undefined")
     {
-      console.log(getString("no-ox"));
+      window.console.log(getString("no-ox"));
       params.ox = 0;
     }
     if(typeof params.oy === "undefined")
     {
-      console.log(getString("no-oy"));
+      window.console.log(getString("no-oy"));
       params.oy = 0;
     }
     img.style.top = (params.oy.toString()+"px");
     img.style.left = (params.ox.toString()+"px");
     img.style.width = (typeof params.tw !== "undefined")?(params.tw.toString()+"px"):undefined;
 
-    const boardMover = document.querySelector(".board-mover");
+    const boardMover = window.document.querySelector(".board-mover");
     if(!boardMover)
     {
       return;
     }
     boardMover.appendChild(img);
 
-    const controlsContainer = document.createElement("div");
+    const controlsContainer = window.document.createElement("div");
     controlsContainer.setAttribute("class", "controlsContainer");
 
-    const templateCheckbox = document.createElement("input");
+    const templateCheckbox = window.document.createElement("input");
     templateCheckbox.setAttribute("type", "checkbox");
     templateCheckbox.setAttribute("id", "templateCheckbox");
     templateCheckbox.checked = parseBool(getStorage("template", true));
     controlsContainer.appendChild(templateCheckbox);
-    const templateCheckboxLabel = document.createElement("label");
+    const templateCheckboxLabel = window.document.createElement("label");
     templateCheckboxLabel.setAttribute("for", "templateCheckbox");
     templateCheckboxLabel.setAttribute("class", "checkboxLabel");
     templateCheckboxLabel.innerHTML = ("&nbsp;"+getString("template-label"));
     controlsContainer.appendChild(templateCheckboxLabel);
 
     var templateSliderStatusValue = function(float){return (Math.round(float*1000)/10).toString()+"%";};
-    const templateSliderContainer = document.createElement("div");
+    const templateSliderContainer = window.document.createElement("div");
     templateSliderContainer.setAttribute("class", "sliderContainer");
-    var templateSlider = document.createElement("input");
+    var templateSlider = window.document.createElement("input");
     templateSlider.setAttribute("type", "range");
     templateSlider.setAttribute("min", "0");
     templateSlider.setAttribute("max", "1");
     templateSlider.setAttribute("step", "0.01");
     templateSlider.value = img.style.opacity;
     templateSliderContainer.appendChild(templateSlider);
-    var templateSliderStatus = document.createElement("div");
+    var templateSliderStatus = window.document.createElement("div");
     templateSliderStatus.setAttribute("class", "sliderStatus");
     templateSliderStatus.innerHTML = templateSliderStatusValue(templateSlider.value);
     templateSliderContainer.appendChild(templateSliderStatus);
@@ -302,28 +305,28 @@
     templateSlider.addEventListener("change", updateTemplateSlider);
     templateSlider.addEventListener("input", updateTemplateSlider);
 
-    const flashCheckbox = document.createElement("input");
+    const flashCheckbox = window.document.createElement("input");
     flashCheckbox.setAttribute("type", "checkbox");
     flashCheckbox.setAttribute("id", "flashCheckbox");
     flashCheckbox.checked = parseBool(getStorage("flash", false));
     controlsContainer.appendChild(flashCheckbox);
-    const flashCheckboxLabel = document.createElement("label");
+    const flashCheckboxLabel = window.document.createElement("label");
     flashCheckboxLabel.setAttribute("for", "flashCheckbox");
     flashCheckboxLabel.setAttribute("class", "checkboxLabel");
     flashCheckboxLabel.innerHTML = ("&nbsp;"+getString("flash-label"));
     controlsContainer.appendChild(flashCheckboxLabel);
 
     var flashSliderStatusValue = function(float){return (Math.round(float*10)/10).toString()+"ms";};
-    const flashSliderContainer = document.createElement("div");
+    const flashSliderContainer = window.document.createElement("div");
     flashSliderContainer.setAttribute("class", "sliderContainer");
-    var flashSlider = document.createElement("input");
+    var flashSlider = window.document.createElement("input");
     flashSlider.setAttribute("type", "range");
     flashSlider.setAttribute("min", "0");
     flashSlider.setAttribute("max", "1000");
     flashSlider.setAttribute("step", "0.1");
     flashSlider.value = getStorage("flashSlider", 66.7);
     flashSliderContainer.appendChild(flashSlider);
-    var flashSliderStatus = document.createElement("div");
+    var flashSliderStatus = window.document.createElement("div");
     flashSliderStatus.setAttribute("class", "sliderStatus");
     flashSliderStatus.innerHTML = flashSliderStatusValue(flashSlider.value);
     flashSliderContainer.appendChild(flashSliderStatus);
@@ -339,9 +342,9 @@
     flashSlider.addEventListener("change", updateFlashSlider);
     flashSlider.addEventListener("input", updateFlashSlider);
 
-    if(typeof App === "object" && typeof App.centerOn === "function" && typeof window.prompt === "function")
+    if(typeof window.App === "object" && typeof window.App.centerOn === "function" && typeof window.prompt === "function")
     {
-      const coordinateButton = document.createElement("input");
+      const coordinateButton = window.document.createElement("input");
       coordinateButton.setAttribute("type", "button");
       coordinateButton.setAttribute("value", getString("jump-to-coordinates"));
       coordinateButton.onclick = askCoordinate;
@@ -350,22 +353,26 @@
     if(typeof window.prompt === "function")
     {
       /* ffmpeg -r 15 -start_number 2 -i canvas_%d.png -s 2000x2000 -vcodec libx264 limelapse.mp4 -frames 30 */
-      controlsContainer.appendChild(document.createElement("br"));
-      const recordButton = document.createElement("input");
+      controlsContainer.appendChild(window.document.createElement("br"));
+      const recordButton = window.document.createElement("input");
       recordButton.setAttribute("type", "button");
       recordButton.setAttribute("value", getString("start-recording"));
-      var recordNbr = 0, isRecording = false, recordTimes = parseInt(getStorage("recordTimes", 0)), recordDelay = parseFloat(getStorage("recordDelay", 10)), recordStop = function() {
-        console.log(getString("stopped-recording", recordNbr));
+      var recordNbr = 0, isRecording = false, recordTimes = window.parseInt(getStorage("recordTimes", 0)), recordDelay = window.parseFloat(getStorage("recordDelay", 10)), recordStop = function() {
+        window.console.log(getString("stopped-recording", recordNbr));
         recordButton.value = getString("start-recording");
         recordNbr = 0;
         isRecording = false;
       }, recordLoop = function() {
         if(isRecording)
         {
-          var a = document.createElement("a");
-          a.href = App.elements.board[0].toDataURL("record/png");
+          var a = window.document.createElement("a");
+          a.href = window.App.elements.board[0].toDataURL("record/png");
           a.download = "canvas_"+recordNbr+".png";
           a.click();
+          if(typeof a.remove === "function")
+          {
+            a.remove();
+          }
           recordButton.value = getString("stop-recording", ++recordNbr);
           if(recordNbr > recordTimes && recordTimes !== 0)
           {
@@ -383,17 +390,17 @@
         }
         else
         {
-          var recDel = parseFloat(prompt(getString("record-delay"), recordDelay));
+          var recDel = window.parseFloat(window.prompt(getString("record-delay"), recordDelay));
           if(!isNaN(recDel))
           {
             recordDelay = recDel;
             setStorage("recordDelay", recordDelay);
-            var recTimes = parseInt(prompt(getString("record-times"), recordTimes));
+            var recTimes = window.parseInt(window.prompt(getString("record-times"), recordTimes));
             if(!isNaN(recTimes))
             {
               recordTimes = recTimes;
               setStorage("recordTimes", recordTimes);
-              console.log(getString("started-recording"));
+              window.console.log(getString("started-recording"));
               recordButton.value = getString("stop-recording", recordNbr);
               isRecording = true;
               recordLoop();
@@ -452,7 +459,7 @@
 
     templateCheckbox.addEventListener("change", updateTemplate);
 
-    document.addEventListener('keydown', function(event) {
+    window.document.addEventListener('keydown', function(event) {
       switch(event.keyCode)
       {
         case 84: /* T */
@@ -464,17 +471,17 @@
         updateFlash();
         break;
         case 189: /* - */
-        templateSlider.value = parseFloat(templateSlider.value)-0.05;
+        templateSlider.value = window.parseFloat(templateSlider.value)-0.05;
         updateTemplateSlider();
         break;
 
         case 187: /* + */
-        templateSlider.value = parseFloat(templateSlider.value)+0.05;
+        templateSlider.value = window.parseFloat(templateSlider.value)+0.05;
         updateTemplateSlider();
         break;
 
         case 74: /* J */
-        if(typeof App === "object" && typeof App.centerOn === "function")
+        if(typeof window.App === "object" && typeof window.App.centerOn === "function")
         {
           askCoordinate();
         }
@@ -485,19 +492,19 @@
     updateTemplateSlider(false);
     updateTemplate(false);
     updateFlash(false);
-    if(typeof App === "object" && typeof App.centerOn === "function" && templateCheckbox.checked && (params.ox !== 0 || params.oy !== 0))
+    if(typeof window.App === "object" && typeof window.App.centerOn === "function" && templateCheckbox.checked && (params.ox !== 0 || params.oy !== 0))
     {
-      App.centerOn(params.ox, params.oy);
+      window.App.centerOn(params.ox, params.oy);
     }
   }
   else
   {
     templateContainer.setAttribute("class", "notemplateurl");
     templateContainer.innerHTML += ('<div class="notification">'+getString("no-url")+'</div>');
-    console.log(getString("no-url"));
+    window.console.log(getString("no-url"));
   }
 
-  const creditContainer = document.createElement("div");
+  const creditContainer = window.document.createElement("div");
   creditContainer.setAttribute("class", "creditContainer");
   creditContainer.innerHTML = getString("credits");
   templateContainer.appendChild(creditContainer);
@@ -508,21 +515,21 @@
   {
     Date.now = function() { return (new Date().getTime()); };
   }
-  document.body.setAttribute("tabindex", -1);
+  window.document.body.setAttribute("tabindex", -1);
   var focusLoop = function() {
-    if(App.cooldown > Date.now())
+    if(window.App.cooldown > Date.now())
     {
-      if(typeof document.activeElement !== "undefined")
+      if(typeof window.document.activeElement !== "undefined")
       {
-        if(document.activeElement !== document.body)
+        if(window.document.activeElement !== window.document.body)
         {
-          console.log(getString("false-focus"));
-          document.body.focus();
+          window.console.log(getString("false-focus"));
+          window.document.body.focus();
         }
       }
       else
       {
-        document.body.focus();
+        window.document.body.focus();
       }
     }
     window.setTimeout(focusLoop, 500);
@@ -532,5 +539,5 @@
   {
     window.pxls_template = undefined;
   }
-  console.log(getString("time-for-reich"));
+  window.console.log(getString("time-for-reich"));
 })();
