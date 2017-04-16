@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.6.5
+// @version      0.6.6
 // @description  Es ist Zeit für Reich
 // @author       >_Luzifix and >_hammer065
 // @match        http://pxls.space/*
@@ -31,8 +31,9 @@
         "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template Skript'),
         "no-url":"Keine Template-URL angegeben!",
         "url-passed":"Template-URL \"%0\" angegeben",
-        "no-ox":"Kein ox Parameter angegeben. Setze auf 0",
-        "no-oy":"Kein oy Parameter angegeben. Setze auf 0",
+        "no-ox":"Kein (valider) ox Parameter angegeben. Setze auf 0",
+        "no-oy":"Kein (valider) oy Parameter angegeben. Setze auf 0",
+        "no-tw":"Kein (valider) tw Parameter angegeben. Ignoriere ihn",
         "template-label":"Template anzeigen [T]",
         "flash-label":"Template flashen lassen [F]",
         "credits":('von <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">Luzifix und <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
@@ -56,8 +57,9 @@
         "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template Script'),
         "no-url":"No Template-URL passed!",
         "url-passed":"Template-URL \"%0\" passed",
-        "no-ox":"No ox parameter passed. Setting to 0",
-        "no-oy":"No oy parameter passed. Setting to 0",
+        "no-ox":"No (valid) ox parameter passed. Setting to 0",
+        "no-oy":"No (valid) oy parameter passed. Setting to 0",
+        "no-tw":"No (valid) tw parameter passed. Ignoring it",
         "template-label":"Show Template [T]",
         "flash-label":"Flash Template [F]",
         "credits":('by <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">Luzifix and <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
@@ -246,26 +248,36 @@
     img.src = params.template;
     img.id = "overlayImage";
     img.style.opacity = getStorage("templateSlider", 0.5);
-    if(typeof params.ox === "undefined")
+    params.ox = window.parseInt(params.ox);
+    if(isNaN(params.ox))
     {
       window.console.log(getString("no-ox"));
       params.ox = 0;
     }
-    if(typeof params.oy === "undefined")
+    params.oy = window.parseInt(params.oy);
+    if(isNaN(params.oy))
     {
       window.console.log(getString("no-oy"));
       params.oy = 0;
     }
+    params.tw = window.parseFloat(params.tw);
+    if(isNaN(params.tw))
+    {
+      window.console.log(getString("no-tw"));
+    }
     img.style.top = (params.oy.toString()+"px");
     img.style.left = (params.ox.toString()+"px");
-    img.style.width = (typeof params.tw !== "undefined")?(params.tw.toString()+"px"):undefined;
+    img.style.width = (!isNaN(params.tw))?(params.tw.toString()+"px"):undefined;
 
     const boardMover = window.document.querySelector(".board-mover");
     if(!boardMover)
     {
       return;
     }
-    boardMover.appendChild(img);
+    if(!usesFagResize)
+    {
+      boardMover.appendChild(img);
+    }
 
     const controlsContainer = window.document.createElement("div");
     controlsContainer.setAttribute("class", "controlsContainer");
@@ -559,11 +571,11 @@
       {
         var ctx = window.App.elements.board_render[0].getContext("2d"),
         posX = -window.App.panX + (window.App.width - window.innerWidth / window.App.scale) / 2,
-        posY = -window.App.panY + (window.App.height - window.innerHeight / window.App.scale) / 2;
-
+        posY = -window.App.panY + (window.App.height - window.innerHeight / window.App.scale) / 2,
+        ownScale = (!isNaN(params.tw))?(params.tw/window.App.width):1;
         ctx.save();
         ctx.globalAlpha = templateSlider.value;
-        ctx.drawImage(img, posX, posY, window.innerWidth / window.App.scale, window.innerHeight / window.App.scale, 0, 0, window.innerWidth, window.innerHeight);
+        ctx.drawImage(img, posX, posY, (window.innerWidth / window.App.scale), (window.innerHeight / window.App.scale), params.ox, params.oy, window.innerWidth, window.innerHeight);
         ctx.restore();
       }
     };
