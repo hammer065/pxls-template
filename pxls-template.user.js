@@ -51,7 +51,8 @@
         "record-times":"Bitte gib an, wie viele Aufnahmen du machen möchtest (0 für Unendlich)",
         "no-localstorage":"LocalStorage ist nicht verfügbar. Einstellungen werden nicht gespeichert",
         "false-focus":"Falsches Element fokussiert. Fokussiere body...",
-        "uses-fag-resize":"Es wird JavaScript zum verschieben und resizen verwendet. Aktiviere Overrides..."
+        "uses-fag-resize":"Es wird JavaScript zum verschieben und resizen verwendet. Aktiviere Overrides...",
+        "no-dependant-class":"Konnte kein Element mit dem Klassennamen \"%0\" finden. Beende..."
       },
       "en":{
         "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template Script'),
@@ -77,7 +78,8 @@
         "record-times":"Please enter how many images you want to create (0 for infinite)",
         "no-localstorage":"LocalStorage is not available. Settings will not be saved",
         "false-focus":"Wrong element is focused. Focusing body...",
-        "uses-fag-resize":"JavaScript is being used to move and resize the canvas. Activating Overrides..."
+        "uses-fag-resize":"JavaScript is being used to move and resize the canvas. Activating Overrides...",
+        "no-dependant-class":"Could not find any Element with class named \"%0\". Exiting..."
       }
     };
     if(typeof string !== "string")
@@ -100,10 +102,10 @@
     {
       if(typeof window.navigator !== "undefined" && typeof window.navigator.language === "string")
       {
-        language = window.navigator.language;
+        language = window.navigator.language.toLowerCase();
         if(typeof l18n[language] === "undefined" || typeof l18n[language][string] === "undefined")
         {
-          language = window.navigator.language.split("-")[0];
+          language = window.navigator.language.split("-")[0].toLowerCase();
         }
       }
       else
@@ -191,6 +193,7 @@
     }
   };
 
+  /* if(typeof window.navigator!=="undefined"&&typeof window.navigator.language==="string"){const reg=["ru","pl","fr","no","nb","nn"];for(i=0;i<reg.length;i++){if(reg[i]==window.navigator.language.split("-")[0].toLowerCase()){return;}}} */
   const uniqueIDs = ["overlayImage", "templateContainer", "templateCheckbox", "flashCheckbox", "tempcontainer", "slider-control"];
   var i = 0;
   if(!(delete window.pxls_template))
@@ -216,12 +219,6 @@
 
   window.console.log("pxls-template"+(version!==""?(" v"+version.toString()):""));
 
-  function toHtml(str) {
-    var htmlObject = window.document.createElement('div');
-    htmlObject.innerHTML = str;
-    return htmlObject.firstChild;
-  }
-
   const query = window.location.search.substring(1).split('&');
   var params = {};
   for(i=0; i<query.length; i++) {
@@ -229,7 +226,12 @@
     params[decodeURIComponent(pair[0])] = (typeof pair[1] !== "undefined")?decodeURIComponent(pair[1]):true;
   }
 
-  const uiContainer = window.document.querySelector(".ui");
+  const uiContainer = window.document.getElementsByClassName("ui")[0];
+  if(typeof uiContainer === "undefined")
+  {
+    window.console.error(getString("no-dependant-class", "ui"));
+    return;
+  }
 
   const styleElement = window.document.createElement("link");
   styleElement.setAttribute("rel", "stylesheet");
@@ -248,13 +250,13 @@
     img.src = params.template;
     img.id = "overlayImage";
     img.style.opacity = getStorage("templateSlider", 0.5);
-    params.ox = window.parseInt(params.ox);
+    params.ox = window.parseFloat(params.ox);
     if(isNaN(params.ox))
     {
       window.console.log(getString("no-ox"));
       params.ox = 0;
     }
-    params.oy = window.parseInt(params.oy);
+    params.oy = window.parseFloat(params.oy);
     if(isNaN(params.oy))
     {
       window.console.log(getString("no-oy"));
@@ -280,9 +282,10 @@
 
     if(!usesFagResize)
     {
-      const boardMover = window.document.querySelector(".board-mover");
-      if(!boardMover)
+      const boardMover = window.document.getElementsByClassName("board-mover")[0];
+      if(typeof boardMover === "undefined")
       {
+        window.console.error(getString("no-dependant-class", "board-mover"));
         return;
       }
       boardMover.appendChild(img);
@@ -587,6 +590,7 @@
         posY = -window.App.panY + (window.App.height - window.innerHeight / window.App.scale) / 2-params.oy;
         boardRendererContext.save();
         boardRendererContext.globalAlpha = templateSlider.value;
+        /* console.log(posX+", "+posY+", "+(window.innerWidth / window.App.scale)+", "+(window.innerHeight / window.App.scale)+", "+ownScale+", "+window.App.scale+", "+window.App.panX+", "+window.App.panY); */
         boardRendererContext.drawImage(img, posX*ownScale, posY*ownScale, (window.innerWidth / window.App.scale)*ownScale, (window.innerHeight / window.App.scale)*ownScale, 0, 0, window.innerWidth, window.innerHeight);
         boardRendererContext.restore();
       }
