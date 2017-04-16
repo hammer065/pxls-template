@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.6.8
+// @version      0.6.9
 // @description  Es ist Zeit für Reich
 // @author       >_Luzifix and >_hammer065
 // @match        http://pxls.space/*
@@ -595,6 +595,12 @@
         boardRendererContext.restore();
       }
     };
+  }
+  if(typeof window.App === "object" && typeof window.App.template === "object")
+  {
+    window.App.template.opacity = 0;
+    window.App.template.use = false;
+    $(".board-template").remove();
   }
   if(!(delete window.pxls_template))
   {
