@@ -12,9 +12,9 @@
 // @grant        none
 // ==/UserScript==
 
-/* Originally created by Endrik on 04-Apr-17. */
-/* Modified by schrej */
-/* Also modified by hammer065 */
+/* Originally created by phiresky */
+/* Forked by LittleEndu on 04-Apr-17. */
+/* Basically rewritten by hammer065 */
 
 (function () {
   'use strict';
@@ -278,13 +278,13 @@
       img.style.left = (params.ox.toString()+"px");
     }
 
-    const boardMover = window.document.querySelector(".board-mover");
-    if(!boardMover)
-    {
-      return;
-    }
     if(!usesFagResize)
     {
+      const boardMover = window.document.querySelector(".board-mover");
+      if(!boardMover)
+      {
+        return;
+      }
       boardMover.appendChild(img);
     }
 
