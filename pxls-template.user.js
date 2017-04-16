@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.6.6
+// @version      0.6.7
 // @description  Es ist Zeit für Reich
 // @author       >_Luzifix and >_hammer065
 // @match        http://pxls.space/*
@@ -240,8 +240,8 @@
   const templateContainer = window.document.createElement("div");
   templateContainer.setAttribute("id", "templateContainer");
   templateContainer.innerHTML = getString("title-name")+(version!==""?(' <span class="version">v'+version.toString()+'</span>'):"")+'<br />';
-
-  if(typeof params.template !== "undefined")
+  const activateTemplate = typeof params.template !== "undefined";
+  if(activateTemplate)
   {
     window.console.log(getString("url-passed", params.template.toString()));
     var img = window.document.createElement("img");
@@ -265,9 +265,18 @@
     {
       window.console.log(getString("no-tw"));
     }
-    img.style.top = (params.oy.toString()+"px");
-    img.style.left = (params.ox.toString()+"px");
-    img.style.width = (!isNaN(params.tw))?(params.tw.toString()+"px"):undefined;
+    else
+    {
+      if(!usesFagResize)
+      {
+        img.style.width = (params.tw.toString()+"px");
+      }
+    }
+    if(!usesFagResize)
+    {
+      img.style.top = (params.oy.toString()+"px");
+      img.style.left = (params.ox.toString()+"px");
+    }
 
     const boardMover = window.document.querySelector(".board-mover");
     if(!boardMover)
@@ -371,7 +380,7 @@
     }
     if(typeof window.prompt === "function")
     {
-      /* ffmpeg -r 15 -start_number 2 -i canvas_%d.png -s 2000x2000 -vcodec libx264 limelapse.mp4 -frames 30 */
+      /* ffmpeg -r 15 -start_number 2 -i canvas_%d.png -s 2000x2000 -vcodec libx264 timelapse.mp4 -frames 30 */
       controlsContainer.appendChild(window.document.createElement("br"));
       const recordButton = window.document.createElement("input");
       recordButton.setAttribute("type", "button");
@@ -486,8 +495,11 @@
       switch(event.keyCode)
       {
         case 84: /* T */
-        templateCheckbox.checked = !templateCheckbox.checked;
-        updateTemplate();
+        if(!flashCheckbox.checked)
+        {
+          templateCheckbox.checked = !templateCheckbox.checked;
+          updateTemplate();
+        }
         break;
         case 70: /* F */
         flashCheckbox.checked = !flashCheckbox.checked;
@@ -561,22 +573,22 @@
 
   if(usesFagResize)
   {
-    /* Fix by >_Luzifix */
+    /* Fix by >_Luzifix; improved by >_hammer065 */
     window.console.warn(getString("uses-fag-resize"));
     window.App.updateTransformOverride = App.updateTransform;
     window.App.updateTransform = function() {
       window.App.updateTransformOverride();
 
-      if(templateCheckbox.checked)
+      if(typeof activateTemplate === "boolean" && activateTemplate && typeof templateCheckbox === "object" && templateCheckbox.checked)
       {
-        var ctx = window.App.elements.board_render[0].getContext("2d"),
-        posX = -window.App.panX + (window.App.width - window.innerWidth / window.App.scale) / 2,
-        posY = -window.App.panY + (window.App.height - window.innerHeight / window.App.scale) / 2,
-        ownScale = (!isNaN(params.tw))?(params.tw/window.App.width):1;
-        ctx.save();
-        ctx.globalAlpha = templateSlider.value;
-        ctx.drawImage(img, posX, posY, (window.innerWidth / window.App.scale), (window.innerHeight / window.App.scale), params.ox, params.oy, window.innerWidth, window.innerHeight);
-        ctx.restore();
+        var boardRendererContext = window.App.elements.board_render[0].getContext("2d"),
+        ownScale = (!isNaN(params.tw))?(img.width/params.tw):1,
+        posX = -window.App.panX + (window.App.width - window.innerWidth / window.App.scale) / 2-params.ox,
+        posY = -window.App.panY + (window.App.height - window.innerHeight / window.App.scale) / 2-params.oy;
+        boardRendererContext.save();
+        boardRendererContext.globalAlpha = templateSlider.value;
+        boardRendererContext.drawImage(img, posX*ownScale, posY*ownScale, (window.innerWidth / window.App.scale)*ownScale, (window.innerHeight / window.App.scale)*ownScale, 0, 0, window.innerWidth, window.innerHeight);
+        boardRendererContext.restore();
       }
     };
   }
