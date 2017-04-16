@@ -4,9 +4,9 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.6.4
+// @version      0.6.5
 // @description  Es ist Zeit für Reich
-// @author       >_hammer065
+// @author       >_Luzifix and >_hammer065
 // @match        http://pxls.space/*
 // @match        https://pxls.space/*
 // @grant        none
@@ -19,6 +19,7 @@
 (function () {
   'use strict';
   window.pxls_template = "";
+  const usesFagResize = (typeof window.App === "object" && typeof window.App.use_js_resize === "boolean" && window.App.use_js_resize);
   const storagePrefix = "pxls-template.";
   const baseURL = "https://rawgit.com/hammer065/pxls-template/master/";
   const baseStaticURL = "https://cdn.rawgit.com/hammer065/pxls-template/master/";
@@ -27,14 +28,14 @@
     var output = "";
     const l18n = {
       "de":{
-        "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template'),
+        "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template Skript'),
         "no-url":"Keine Template-URL angegeben!",
         "url-passed":"Template-URL \"%0\" angegeben",
         "no-ox":"Kein ox Parameter angegeben. Setze auf 0",
         "no-oy":"Kein oy Parameter angegeben. Setze auf 0",
         "template-label":"Template anzeigen [T]",
         "flash-label":"Template flashen lassen [F]",
-        "credits":('von <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
+        "credits":('von <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">Luzifix und <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
         "time-for-reich":"Es ist Zeit für Reich!",
         "invalid-storage-key":"Ungültiger Storagename!",
         "prompt-x-coord":"Bitte gib die X-Koordinate ein, zu der du springen willst:",
@@ -48,17 +49,18 @@
         "record-delay":"Bitte gib die Zeit in Sekunden an, die zwischen den Aufnahmen gewartet werden soll",
         "record-times":"Bitte gib an, wie viele Aufnahmen du machen möchtest (0 für Unendlich)",
         "no-localstorage":"LocalStorage ist nicht verfügbar. Einstellungen werden nicht gespeichert",
-        "false-focus":"Falsches Element fokussiert. Fokussiere body..."
+        "false-focus":"Falsches Element fokussiert. Fokussiere body...",
+        "uses-fag-resize":"Es wird JavaScript zum verschieben und resizen verwendet. Aktiviere Overrides..."
       },
       "en":{
-        "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template'),
+        "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template Script'),
         "no-url":"No Template-URL passed!",
         "url-passed":"Template-URL \"%0\" passed",
         "no-ox":"No ox parameter passed. Setting to 0",
         "no-oy":"No oy parameter passed. Setting to 0",
         "template-label":"Show Template [T]",
         "flash-label":"Flash Template [F]",
-        "credits":('by <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
+        "credits":('by <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">Luzifix and <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
         "time-for-reich":"It's time for Reich!",
         "invalid-storage-key":"Invalid storage key!",
         "prompt-x-coord":"Please enter the X-coordinate you want to jump to:",
@@ -72,7 +74,8 @@
         "record-delay":"Please enter the delay between each image",
         "record-times":"Please enter how many images you want to create (0 for infinite)",
         "no-localstorage":"LocalStorage is not available. Settings will not be saved",
-        "false-focus":"Wrong element is focused. Focusing body..."
+        "false-focus":"Wrong element is focused. Focusing body...",
+        "uses-fag-resize":"JavaScript is being used to move and resize the canvas. Activating Overrides..."
       }
     };
     if(typeof string !== "string")
@@ -301,6 +304,10 @@
       }
       templateSliderStatus.innerHTML = templateSliderStatusValue(templateSlider.value);
       img.style.opacity = templateSlider.value;
+      if(usesFagResize)
+      {
+        window.App.updateTransform();
+      }
     };
     templateSlider.addEventListener("change", updateTemplateSlider);
     templateSlider.addEventListener("input", updateTemplateSlider);
@@ -420,6 +427,10 @@
         setStorage("template", templateCheckbox.checked);
       }
       img.style.visibility = templateCheckbox.checked?"visible":"hidden";
+      if(usesFagResize)
+      {
+        window.App.updateTransform();
+      }
     };
 
     var flashOldTemplate = templateCheckbox.checked;
@@ -440,7 +451,7 @@
           setStorage("flash", flashCheckbox.checked);
         }
         templateCheckbox.disabled = true;
-        flashSlider.disabled = true;
+        /* flashSlider.disabled = true; */
         flashLoop();
       }
       else
@@ -451,7 +462,7 @@
           setStorage("flash", flashCheckbox.checked);
         }
         templateCheckbox.disabled = false;
-        flashSlider.disabled = false;
+        /* flashSlider.disabled = false; */
         updateTemplate();
       }
     };
@@ -535,6 +546,28 @@
     window.setTimeout(focusLoop, 500);
   };
   focusLoop();
+
+  if(usesFagResize)
+  {
+    /* Fix by >_Luzifix */
+    window.console.warn(getString("uses-fag-resize"));
+    window.App.updateTransformOverride = App.updateTransform;
+    window.App.updateTransform = function() {
+      window.App.updateTransformOverride();
+
+      if(templateCheckbox.checked)
+      {
+        var ctx = window.App.elements.board_render[0].getContext("2d"),
+        posX = -window.App.panX + (window.App.width - window.innerWidth / window.App.scale) / 2,
+        posY = -window.App.panY + (window.App.height - window.innerHeight / window.App.scale) / 2;
+
+        ctx.save();
+        ctx.globalAlpha = templateSlider.value;
+        ctx.drawImage(img, posX, posY, window.innerWidth / window.App.scale, window.innerHeight / window.App.scale, 0, 0, window.innerWidth, window.innerHeight);
+        ctx.restore();
+      }
+    };
+  }
   if(!(delete window.pxls_template))
   {
     window.pxls_template = undefined;
