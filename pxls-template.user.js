@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.6.15
+// @version      0.6.16
 // @description  Es ist Zeit für Reich
 // @author       >_Luzifix and >_hammer065
 // @match        http://pxls.space/*
@@ -527,35 +527,58 @@
     templateCheckbox.addEventListener("change", updateTemplate);
 
     window.document.addEventListener('keydown', function(event) {
-      switch(event.keyCode)
+      var keyFound = true;
+      if(typeof event === "object")
       {
-        case 84: /* T */
-        if(!flashCheckbox.checked)
+        switch(event.keyCode)
         {
-          templateCheckbox.checked = !templateCheckbox.checked;
-          updateTemplate();
+          case 84: /* T */
+          if(!flashCheckbox.checked)
+          {
+            templateCheckbox.checked = !templateCheckbox.checked;
+            updateTemplate();
+          }
+          break;
+          case 70: /* F */
+          flashCheckbox.checked = !flashCheckbox.checked;
+          updateFlash();
+          break;
+          case 189: /* - */
+          templateSlider.value = window.parseFloat(templateSlider.value)-0.05;
+          updateTemplateSlider();
+          break;
+
+          case 187: /* + */
+          templateSlider.value = window.parseFloat(templateSlider.value)+0.05;
+          updateTemplateSlider();
+          break;
+
+          case 74: /* J */
+          if(typeof window.App === "object" && typeof window.App.centerOn === "function")
+          {
+            askCoordinate();
+          }
+          break;
+
+          default:
+          keyFound = false;
+          break;
         }
-        break;
-        case 70: /* F */
-        flashCheckbox.checked = !flashCheckbox.checked;
-        updateFlash();
-        break;
-        case 189: /* - */
-        templateSlider.value = window.parseFloat(templateSlider.value)-0.05;
-        updateTemplateSlider();
-        break;
-
-        case 187: /* + */
-        templateSlider.value = window.parseFloat(templateSlider.value)+0.05;
-        updateTemplateSlider();
-        break;
-
-        case 74: /* J */
-        if(typeof window.App === "object" && typeof window.App.centerOn === "function")
+        if(keyFound)
         {
-          askCoordinate();
+          if(typeof event.stopPropagation === "function")
+          {
+            event.stopPropagation();
+          }
+          if(typeof event.stopImmediatePropagation === "function")
+          {
+            event.stopImmediatePropagation();
+          }
+          if(typeof event.preventDefault === "function")
+          {
+            event.preventDefault();
+          }
         }
-        break;
       }
     });
 
