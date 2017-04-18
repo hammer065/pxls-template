@@ -146,7 +146,10 @@
     }
     else
     {
-      window.console.log(getString("no-localstorage"));
+      if(typeof window.localStorage === "undefined")
+      {
+        window.console.log(getString("no-localstorage"));
+      }
       if(typeof fallback !== "undefined")
       {
         return fallback;
