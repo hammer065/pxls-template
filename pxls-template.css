@@ -11,7 +11,7 @@
   -ms-interpolation-mode: nearest-neighbor;
 }
 #templateContainer {
-  bottom: 63px;
+  bottom: 120px;
   right: 0px;
   position: fixed;
   background-color: #161618;
