@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.6.13
+// @version      0.6.14
 // @description  Es ist Zeit für Reich
 // @author       >_Luzifix and >_hammer065
 // @match        http://pxls.space/*
@@ -31,9 +31,9 @@
         "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template Skript'),
         "no-url":"Keine Template-URL angegeben!",
         "url-passed":"Template-URL \"%0\" angegeben",
-        "no-ox":"Kein (valider) ox Parameter angegeben. Setze auf 0",
-        "no-oy":"Kein (valider) oy Parameter angegeben. Setze auf 0",
-        "no-tw":"Kein (valider) tw Parameter angegeben. Ignoriere ihn",
+        "no-ox":"Kein (gültiger) ox Parameter angegeben. Setze auf 0",
+        "no-oy":"Kein (gültiger) oy Parameter angegeben. Setze auf 0",
+        "no-tw":"Kein (gültiger) tw Parameter angegeben. Ignoriere ihn",
         "template-label":"Template anzeigen [T]",
         "flash-label":"Template flashen lassen [F]",
         "credits":('von <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">Luzifix und <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
@@ -52,7 +52,9 @@
         "no-localstorage":"LocalStorage ist nicht verfügbar. Einstellungen werden nicht gespeichert",
         "false-focus":"Falsches Element fokussiert. Fokussiere body...",
         "uses-fag-resize":"Es wird JavaScript zum verschieben und resizen verwendet. Aktiviere Overrides...",
-        "no-dependant-class":"Konnte kein Element mit dem Klassennamen \"%0\" finden. Beende..."
+        "no-dependant-class":"Konnte kein Element mit dem Klassennamen \"%0\" finden. Beende...",
+        "temp-param-url":"Bitte ändere den \"template\" Teil der pxl URL in \"url\" da die pxl devs (mal wieder) verkackt haben",
+        "notication-no-string":"Kein (gültiger) string Parameter angegeben. Ignoriere notification-Aufruf"
       },
       "en":{
         "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template Script'),
@@ -79,7 +81,9 @@
         "no-localstorage":"LocalStorage is not available. Settings will not be saved",
         "false-focus":"Wrong element is focused. Focusing body...",
         "uses-fag-resize":"JavaScript is being used to move and resize the canvas. Activating Overrides...",
-        "no-dependant-class":"Could not find any Element with class named \"%0\". Exiting..."
+        "no-dependant-class":"Could not find any Element with class named \"%0\". Exiting...",
+        "temp-param-url":"Please change the \"template\" part in the pxl URL in \"url\" since the pxl devs fucked up (again)",
+        "notication-no-string":"No (valid) string parameter passed. Ignoring notification call"
       }
     };
     if(typeof string !== "string")
@@ -191,6 +195,16 @@
         }
       }
     }
+  }, notification = function(string)
+  {
+    if(typeof string !== "string")
+    {
+      console.warn(getString("notication-no-string"));
+      return;
+    }
+    templateContainer.setAttribute("class", "notemplateurl");
+    templateContainer.innerHTML += ('<div class="notification">'+string+'</div>');
+    window.console.log(string);
   };
 
   /* if(typeof window.navigator!=="undefined"&&typeof window.navigator.language==="string"){const reg=["ru","pl","fr","no","nb","nn"];for(i=0;i<reg.length;i++){if(reg[i]==window.navigator.language.split("-")[0].toLowerCase()){return;}}} */
@@ -223,7 +237,7 @@
   var params = {};
   for(i=0; i<query.length; i++) {
     var pair = query[i].split('=');
-    params[decodeURIComponent(pair[0])] = (typeof pair[1] !== "undefined")?decodeURIComponent(pair[1]):true;
+    params[window.decodeURIComponent(pair[0])] = (typeof pair[1] !== "undefined")?window.decodeURIComponent(pair[1]):true;
   }
 
   const uiContainer = window.document.getElementsByClassName("ui")[0];
@@ -242,12 +256,30 @@
   const templateContainer = window.document.createElement("div");
   templateContainer.setAttribute("id", "templateContainer");
   templateContainer.innerHTML = getString("title-name")+(version!==""?(' <span class="version">v'+version.toString()+'</span>'):"")+'<br />';
-  const activateTemplate = typeof params.template !== "undefined";
+  const activateTemplate = typeof params.url !== "undefined";
+  if(typeof params.template !== "undefined")
+  {
+    console.warn(getString("temp-param-url"));
+    if(typeof window.location === "object" && typeof window.location.href !== "undefined" && typeof window.location.origin !== "undefined")
+    {
+      var redirect = window.location.origin+"?";
+      for(var prop in params)
+      {
+        redirect += ((prop!=="template")?window.encodeURIComponent(prop):"url")+((params[prop]!==true)?("="+window.encodeURIComponent(params[prop])):"");
+      }
+      window.location.href = redirect.replace(/,$/, "");
+    }
+    else
+    {
+      window.alert(getString("temp-param-url"));
+    }
+    return;
+  }
   if(activateTemplate)
   {
-    window.console.log(getString("url-passed", params.template.toString()));
+    window.console.log(getString("url-passed", params.url.toString()));
     var img = window.document.createElement("img");
-    img.src = params.template;
+    img.src = params.url;
     img.id = "overlayImage";
     img.style.opacity = getStorage("templateSlider", 0.5);
     params.ox = window.parseFloat(params.ox);
@@ -537,9 +569,7 @@
   }
   else
   {
-    templateContainer.setAttribute("class", "notemplateurl");
-    templateContainer.innerHTML += ('<div class="notification">'+getString("no-url")+'</div>');
-    window.console.log(getString("no-url"));
+    notification(getString("no-url"));
   }
 
   const creditContainer = window.document.createElement("div");
@@ -555,7 +585,7 @@
   }
   window.document.body.setAttribute("tabindex", -1);
   var focusLoop = function() {
-    if(window.App.cooldown > Date.now())
+    if(typeof window.App == "object" && typeof window.App.cooldown !== "undefined" && (window.App.cooldown > Date.now()))
     {
       if(typeof window.document.activeElement !== "undefined")
       {
