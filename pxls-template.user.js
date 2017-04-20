@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.7.1
+// @version      0.7.2
 // @description  Es ist Zeit für Reich
 // @author       >_Luzifix and >_hammer065
 // @match        http://pxls.space/*
@@ -146,6 +146,11 @@
         args = [args];
       }
     }
+    if(typeof l18n !== "object")
+    {
+      window.console.error("No l18n object available!");
+      return "$"+string.toString().toUpperCase()+"["+args.join(", ")+"]$";
+    }
     if(typeof language !== "string")
     {
       if(typeof window.navigator !== "undefined" && typeof window.navigator.language === "string")
@@ -176,7 +181,8 @@
     }
     else
     {
-      return "$"+string.toString().toUpperCase()+"$";
+      window.console.warn("Unknown String \""+string.toString()+"\"");
+      return "$"+string.toString().toUpperCase()+"["+args.join(", ")+"]$";
     }
   }, getStorage = function(key, fallback) {
     if(typeof key !== "string")
@@ -246,7 +252,7 @@
   {
     if(typeof string !== "string")
     {
-      console.warn(getString("notication-no-string"));
+      window.console.warn(getString("notication-no-string"));
       return;
     }
     templateContainer.setAttribute("class", "notify");
@@ -324,7 +330,7 @@
   const activateTemplate = typeof params.url !== "undefined";
   if(typeof params.template !== "undefined" && !(usesFagResize && !canUseFagResizeFix))
   {
-    console.warn(getString("temp-param-url"));
+    window.console.warn(getString("temp-param-url"));
     if(!changeParam("template", "url"))
     {
       window.alert(getString("temp-param-url"));
@@ -423,7 +429,7 @@
     }, templateSliderPrompt = function(event) {
       if(typeof window.prompt === "function")
       {
-        const int = window.parseInt(window.prompt(getString("set-slider", getString("percent")), (templateSlider.value*100).toString().replace(".", getString("decimal-mark"))).replace(",","."));
+        const int = window.parseInt(window.prompt(getString("set-slider", getString("percent")), (templateSlider.value*100).toString().replace(".", getString("decimal-mark"))).replace(getString("decimal-mark"),".").replace(",","."));
         if(!isNaN(int))
         {
           templateSlider.value = (int/100);
@@ -446,7 +452,7 @@
     flashCheckboxLabel.innerHTML = ("&nbsp;"+getString("flash-label"));
     controlsContainer.appendChild(flashCheckboxLabel);
 
-    var flashSliderStatusValue = function(float){return (Math.round(float*10)/10).toString().replace(".", getString("decimal-mark"))+"ms";};
+    var flashSliderStatusValue = function(float){return (Math.round(float*10)/10).toString().replace(".", getString("decimal-mark"))+getString("ms");};
     const flashSliderContainer = window.document.createElement("div");
     flashSliderContainer.setAttribute("class", "sliderContainer");
     var flashSlider = window.document.createElement("input");
@@ -471,7 +477,7 @@
     }, flashSliderPrompt = function(event) {
       if(typeof window.prompt === "function")
       {
-        const float = window.parseFloat(window.prompt(getString("set-slider", getString("ms")), flashSlider.value.toString().replace(".", getString("decimal-mark"))).replace(",","."));
+        const float = window.parseFloat(window.prompt(getString("set-slider", getString("ms")), flashSlider.value.toString().replace(".", getString("decimal-mark"))).replace(getString("decimal-mark"),".").replace(",","."));
         if(!isNaN(float))
         {
           flashSlider.value = (Math.round(float*10)/10);
@@ -506,14 +512,15 @@
       coordinateButton.onclick = askCoordinate;
       controlsContainer.appendChild(coordinateButton);
     }
-    if(typeof window.prompt === "function")
+    const hasAppBoardElement = (typeof window.App === "object" && typeof window.App.elements === "object" && typeof window.App.elements.board !== "undefined");
+    if(typeof window.prompt === "function" && (window.document.getElementById("board") !== null || (usesFagResize && hasAppBoardElement)))
     {
       /* ffmpeg -r 15 -start_number 2 -i canvas_%d.png -s 2000x2000 -vcodec libx264 timelapse.mp4 -frames 30 */
       addBr();
       const recordButton = window.document.createElement("input");
       recordButton.setAttribute("type", "button");
       recordButton.setAttribute("value", getString("start-recording"));
-      var recordNbr = 0, isRecording = false, recordTimes = window.parseInt(getStorage("recordTimes", 0)), recordDelay = window.parseFloat(getStorage("recordDelay", 10)), recordStop = function() {
+      var recordNbr = 0, isRecording = false, recordTimes = window.parseInt(getStorage("recordTimes", 0)), recordDelay = window.parseFloat(getStorage("recordDelay", 10)), recordBoard = (usesFagResize?window.App.elements.board[0]:window.document.getElementById("board")), recordStop = function() {
         window.console.log(getString("stopped-recording", recordNbr));
         recordButton.value = getString("start-recording");
         recordNbr = 0;
@@ -522,7 +529,7 @@
         if(isRecording)
         {
           var a = window.document.createElement("a");
-          a.href = window.App.elements.board[0].toDataURL("record/png");
+          a.href = recordBoard.toDataURL("record/png");
           a.download = "canvas_"+recordNbr+".png";
           a.click();
           if(typeof a.remove === "function")
@@ -738,7 +745,7 @@
           posY = -window.App.panY + (window.App.height - window.innerHeight / window.App.scale) / 2-params.oy;
           boardRendererContext.save();
           boardRendererContext.globalAlpha = templateSlider.value;
-          /* console.log(posX+", "+posY+", "+(window.innerWidth / window.App.scale)+", "+(window.innerHeight / window.App.scale)+", "+ownScale+", "+window.App.scale+", "+window.App.panX+", "+window.App.panY); */
+          /* window.console.log(posX+", "+posY+", "+(window.innerWidth / window.App.scale)+", "+(window.innerHeight / window.App.scale)+", "+ownScale+", "+window.App.scale+", "+window.App.panX+", "+window.App.panY); */
           boardRendererContext.drawImage(img, posX*ownScale, posY*ownScale, (window.innerWidth / window.App.scale)*ownScale, (window.innerHeight / window.App.scale)*ownScale, 0, 0, window.innerWidth, window.innerHeight);
           boardRendererContext.restore();
         }
@@ -757,7 +764,7 @@
       }
       else
       {
-        console.warn(getString("script-cant-work"));
+        window.console.warn(getString("script-cant-work"));
         notification(getString("script-cant-work"));
       }
     }
