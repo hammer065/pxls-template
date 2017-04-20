@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.6.16
+// @version      0.7
 // @description  Es ist Zeit für Reich
 // @author       >_Luzifix and >_hammer065
 // @match        http://pxls.space/*
@@ -19,7 +19,37 @@
 (function () {
   'use strict';
   window.pxls_template = "";
-  const usesFagResize = (typeof window.App === "object" && typeof window.App.use_js_resize === "boolean" && window.App.use_js_resize);
+  var checkFagResize = function() {
+    /* Original Code from pxls.space's pxls.js file to set use_js_resize */
+    var checkImageRendering = function(prefix, crisp, pixelated, optimize_contrast){
+      var d = document.createElement('div');
+      if (crisp) {
+        d.style.imageRendering = prefix + 'crisp-edges';
+        if (d.style.imageRendering === prefix + 'crisp-edges') {
+          return true;
+        }
+      }
+      if (pixelated) {
+        d.style.imageRendering = prefix + 'pixelated';
+        if (d.style.imageRendering === prefix + 'pixelated') {
+          return true;
+        }
+      }
+      if (optimize_contrast) {
+        d.style.imageRendering = prefix + 'optimize-contrast';
+        if (d.style.imageRendering === prefix + 'optimize-contrast') {
+          return true;
+        }
+      }
+      return false;
+    },
+    have_image_rendering = checkImageRendering('', true, true, false) || checkImageRendering('-o-', true, false, false) || checkImageRendering('-moz-', true, false, false) || checkImageRendering('-webkit-', true, false, true);
+
+    return !have_image_rendering;
+  };
+
+  const usesFagResize = checkFagResize();
+  const canUseFagResizeFix = (typeof window.App === "object" && typeof window.App.updateTransform === "function");
   const storagePrefix = "pxls-template.";
   const baseURL = "https://rawgit.com/hammer065/pxls-template/master/";
   const baseStaticURL = "https://cdn.rawgit.com/hammer065/pxls-template/master/";
@@ -53,8 +83,15 @@
         "false-focus":"Falsches Element fokussiert. Fokussiere body...",
         "uses-fag-resize":"Es wird JavaScript zum verschieben und resizen verwendet. Aktiviere Overrides...",
         "no-dependant-class":"Konnte kein Element mit dem Klassennamen \"%0\" finden. Beende...",
-        "temp-param-url":"Bitte ändere den \"template\" Teil der pxl URL in \"url\" da die pxl devs (mal wieder) verkackt haben",
-        "notication-no-string":"Kein (gültiger) string Parameter angegeben. Ignoriere notification-Aufruf"
+        "temp-param-url":"Bitte ändere den \"template\" Teil der pxl URL zu \"url\" da die pxl devs (mal wieder) verkackt haben",
+        "notication-no-string":"Kein (gültiger) string Parameter angegeben. Ignoriere notification-Aufruf",
+        "set-slider":"Bitte gib einen neuen Wert für den Regler in %0 an",
+        "percent":"Prozent",
+        "ms":"ms",
+        "decimal-mark":",",
+        "fag-resize-unsupported":"Leider ist durch die Sandbox auf der pxl-Seite der eigene Support für Templates im Fallback-JS-Resize-Modus nicht mehr möglich.",
+        "fag-resize-unsupported-change":"Bitte ändere daher den \"url\" Teil der pxl URL zu \"template\" um",
+        "script-cant-work":"Skript deaktiviert, da es hier nicht funktionieren kann..."
       },
       "en":{
         "title-name":('<img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0Logo"> Template Script'),
@@ -82,8 +119,15 @@
         "false-focus":"Wrong element is focused. Focusing body...",
         "uses-fag-resize":"JavaScript is being used to move and resize the canvas. Activating Overrides...",
         "no-dependant-class":"Could not find any Element with class named \"%0\". Exiting...",
-        "temp-param-url":"Please change the \"template\" part in the pxl URL in \"url\" since the pxl devs fucked up (again)",
-        "notication-no-string":"No (valid) string parameter passed. Ignoring notification call"
+        "temp-param-url":"Please change the \"template\" part in the pxl URL to \"url\" since the pxl devs fucked up (again)",
+        "notication-no-string":"No (valid) string parameter passed. Ignoring notification call",
+        "set-slider":"Please enter a new value for the slider in %0",
+        "percent":"percent",
+        "ms":"ms",
+        "decimal-mark":".",
+        "fag-resize-unsupported":"Sadly due to the sandbox on the pxl website, the support for templates in fallback-js-resize mode is not possible anymore.",
+        "fag-resize-unsupported-change":"Therefore, please change the \"url\" part in the pxl URL to \"template\"",
+        "script-cant-work":"Disabled script since it cannot work in this case..."
       }
     };
     if(typeof string !== "string")
@@ -205,9 +249,27 @@
       console.warn(getString("notication-no-string"));
       return;
     }
-    templateContainer.setAttribute("class", "notemplateurl");
+    templateContainer.setAttribute("class", "notify");
     templateContainer.innerHTML += ('<div class="notification">'+string+'</div>');
     window.console.log(string);
+  }, changeParam = function(paramFrom, paramTo) {
+    if(typeof window.location === "object" && typeof window.location.href !== "undefined" && typeof window.location.origin !== "undefined" && typeof params === "object")
+    {
+      if(typeof params[paramFrom] !== "undefined")
+      {
+        var redirect = window.location.origin+"?";
+        for(var prop in params)
+        {
+          redirect += ((prop!==paramFrom)?window.encodeURIComponent(prop):window.encodeURIComponent(paramTo))+((params[prop]!==true)?("="+window.encodeURIComponent(params[prop])+"&"):"");
+        }
+        window.location.href = redirect.replace(/&$/, "");
+      }
+      return true;
+    }
+    else
+    {
+      return false;
+    }
   };
 
   /* if(typeof window.navigator!=="undefined"&&typeof window.navigator.language==="string"){const reg=["ru","pl","fr","no","nb","nn"];for(i=0;i<reg.length;i++){if(reg[i]==window.navigator.language.split("-")[0].toLowerCase()){return;}}} */
@@ -260,19 +322,10 @@
   templateContainer.setAttribute("id", "templateContainer");
   templateContainer.innerHTML = getString("title-name")+(version!==""?(' <span class="version">v'+version.toString()+'</span>'):"")+'<br />';
   const activateTemplate = typeof params.url !== "undefined";
-  if(typeof params.template !== "undefined")
+  if(typeof params.template !== "undefined" && !(usesFagResize && !canUseFagResizeFix))
   {
     console.warn(getString("temp-param-url"));
-    if(typeof window.location === "object" && typeof window.location.href !== "undefined" && typeof window.location.origin !== "undefined")
-    {
-      var redirect = window.location.origin+"?";
-      for(var prop in params)
-      {
-        redirect += ((prop!=="template")?window.encodeURIComponent(prop):"url")+((params[prop]!==true)?("="+window.encodeURIComponent(params[prop])+"&"):"");
-      }
-      window.location.href = redirect.replace(/&$/, "");
-    }
-    else
+    if(!changeParam("template", "url"))
     {
       window.alert(getString("temp-param-url"));
     }
@@ -340,7 +393,7 @@
     templateCheckboxLabel.innerHTML = ("&nbsp;"+getString("template-label"));
     controlsContainer.appendChild(templateCheckboxLabel);
 
-    var templateSliderStatusValue = function(float){return (Math.round(float*1000)/10).toString()+"%";};
+    var templateSliderStatusValue = function(float){return (Math.round(float*1000)/10).toString().replace(".", getString("decimal-mark"))+"%";};
     const templateSliderContainer = window.document.createElement("div");
     templateSliderContainer.setAttribute("class", "sliderContainer");
     var templateSlider = window.document.createElement("input");
@@ -367,9 +420,20 @@
       {
         window.App.updateTransform();
       }
+    }, templateSliderPrompt = function(event) {
+      if(typeof window.prompt === "function")
+      {
+        const int = window.parseInt(window.prompt(getString("set-slider", getString("percent")), (templateSlider.value*100).toString().replace(".", getString("decimal-mark"))).replace(",","."));
+        if(!isNaN(int))
+        {
+          templateSlider.value = (int/100);
+          updateTemplateSlider();
+        }
+      }
     };
     templateSlider.addEventListener("change", updateTemplateSlider);
     templateSlider.addEventListener("input", updateTemplateSlider);
+    templateSliderStatus.addEventListener("dblclick", templateSliderPrompt);
 
     const flashCheckbox = window.document.createElement("input");
     flashCheckbox.setAttribute("type", "checkbox");
@@ -382,7 +446,7 @@
     flashCheckboxLabel.innerHTML = ("&nbsp;"+getString("flash-label"));
     controlsContainer.appendChild(flashCheckboxLabel);
 
-    var flashSliderStatusValue = function(float){return (Math.round(float*10)/10).toString()+"ms";};
+    var flashSliderStatusValue = function(float){return (Math.round(float*10)/10).toString().replace(".", getString("decimal-mark"))+"ms";};
     const flashSliderContainer = window.document.createElement("div");
     flashSliderContainer.setAttribute("class", "sliderContainer");
     var flashSlider = window.document.createElement("input");
@@ -404,12 +468,38 @@
         setStorage("flashSlider", flashSlider.value);
       }
       flashSliderStatus.innerHTML = flashSliderStatusValue(flashSlider.value);
+    }, flashSliderPrompt = function(event) {
+      if(typeof window.prompt === "function")
+      {
+        const float = window.parseFloat(window.prompt(getString("set-slider", getString("ms")), flashSlider.value.toString().replace(".", getString("decimal-mark"))).replace(",","."));
+        if(!isNaN(float))
+        {
+          flashSlider.value = (Math.round(float*10)/10);
+          updateFlashSlider();
+        }
+      }
     };
     flashSlider.addEventListener("change", updateFlashSlider);
     flashSlider.addEventListener("input", updateFlashSlider);
+    flashSliderStatus.addEventListener("dblclick", flashSliderPrompt);
+
+    var curBr = false, addBr = function() {
+      if(typeof controlsContainer === "object")
+      {
+        if(curBr)
+        {
+          controlsContainer.appendChild(window.document.createElement("br"));
+        }
+        else
+        {
+          curBr = true;
+        }
+      }
+    };
 
     if(typeof window.App === "object" && typeof window.App.centerOn === "function" && typeof window.prompt === "function")
     {
+      addBr();
       const coordinateButton = window.document.createElement("input");
       coordinateButton.setAttribute("type", "button");
       coordinateButton.setAttribute("value", getString("jump-to-coordinates"));
@@ -419,7 +509,7 @@
     if(typeof window.prompt === "function")
     {
       /* ffmpeg -r 15 -start_number 2 -i canvas_%d.png -s 2000x2000 -vcodec libx264 timelapse.mp4 -frames 30 */
-      controlsContainer.appendChild(window.document.createElement("br"));
+      addBr();
       const recordButton = window.document.createElement("input");
       recordButton.setAttribute("type", "button");
       recordButton.setAttribute("value", getString("start-recording"));
@@ -546,12 +636,12 @@
           flashCheckbox.checked = !flashCheckbox.checked;
           updateFlash();
           break;
-          case 189: /* - */
+          case 71: /* G */
           templateSlider.value = window.parseFloat(templateSlider.value)-0.05;
           updateTemplateSlider();
           break;
 
-          case 187: /* + */
+          case 72: /* H */
           templateSlider.value = window.parseFloat(templateSlider.value)+0.05;
           updateTemplateSlider();
           break;
@@ -632,31 +722,57 @@
 
   if(usesFagResize)
   {
-    /* Fix by >_Luzifix; improved by >_hammer065 */
-    window.console.warn(getString("uses-fag-resize"));
-    window.App.updateTransformOverride = App.updateTransform;
-    window.App.updateTransform = function() {
-      window.App.updateTransformOverride();
+    if(canUseFagResizeFix)
+    {
+      /* Fix by >_Luzifix; improved by >_hammer065 */
+      window.console.warn(getString("uses-fag-resize"));
+      window.App.updateTransformOverride = App.updateTransform;
+      window.App.updateTransform = function() {
+        window.App.updateTransformOverride();
 
-      if(typeof activateTemplate === "boolean" && activateTemplate && typeof templateCheckbox === "object" && templateCheckbox.checked)
+        if(typeof activateTemplate === "boolean" && activateTemplate && typeof templateCheckbox === "object" && templateCheckbox.checked)
+        {
+          var boardRendererContext = window.App.elements.board_render[0].getContext("2d"),
+          ownScale = (!isNaN(params.tw))?(img.width/params.tw):1,
+          posX = -window.App.panX + (window.App.width - window.innerWidth / window.App.scale) / 2-params.ox,
+          posY = -window.App.panY + (window.App.height - window.innerHeight / window.App.scale) / 2-params.oy;
+          boardRendererContext.save();
+          boardRendererContext.globalAlpha = templateSlider.value;
+          /* console.log(posX+", "+posY+", "+(window.innerWidth / window.App.scale)+", "+(window.innerHeight / window.App.scale)+", "+ownScale+", "+window.App.scale+", "+window.App.panX+", "+window.App.panY); */
+          boardRendererContext.drawImage(img, posX*ownScale, posY*ownScale, (window.innerWidth / window.App.scale)*ownScale, (window.innerHeight / window.App.scale)*ownScale, 0, 0, window.innerWidth, window.innerHeight);
+          boardRendererContext.restore();
+        }
+      };
+    }
+    else
+    {
+      window.console.error(getString("fag-resize-unsupported"));
+      if(typeof params === "object" && typeof params.url !== "undefined")
       {
-        var boardRendererContext = window.App.elements.board_render[0].getContext("2d"),
-        ownScale = (!isNaN(params.tw))?(img.width/params.tw):1,
-        posX = -window.App.panX + (window.App.width - window.innerWidth / window.App.scale) / 2-params.ox,
-        posY = -window.App.panY + (window.App.height - window.innerHeight / window.App.scale) / 2-params.oy;
-        boardRendererContext.save();
-        boardRendererContext.globalAlpha = templateSlider.value;
-        /* console.log(posX+", "+posY+", "+(window.innerWidth / window.App.scale)+", "+(window.innerHeight / window.App.scale)+", "+ownScale+", "+window.App.scale+", "+window.App.panX+", "+window.App.panY); */
-        boardRendererContext.drawImage(img, posX*ownScale, posY*ownScale, (window.innerWidth / window.App.scale)*ownScale, (window.innerHeight / window.App.scale)*ownScale, 0, 0, window.innerWidth, window.innerHeight);
-        boardRendererContext.restore();
+        window.console.error(getString("fag-resize-unsupported-change"));
+        if(!changeParam("url", "template"))
+        {
+          window.alert(getString("fag-resize-unsupported")+"\n"+getString("fag-resize-unsupported-change"));
+        }
       }
-    };
+      else
+      {
+        console.warn(getString("script-cant-work"));
+        notification(getString("script-cant-work"));
+      }
+    }
   }
 
   if(typeof window.App === "object" && typeof window.App.updateTemplate === "function")
   {
     window.App.updateTemplate({"use":false});
     window.App.updateTemplate = function(a){};
+  }
+
+  const infoDiv = window.document.getElementsByClassName("info")[0];
+  if(typeof infoDiv !== "undefined")
+  {
+    infoDiv.className="info";
   }
 
   if(!(delete window.pxls_template))
