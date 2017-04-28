@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.7.2
+// @version      0.7.3
 // @description  Es ist Zeit für Reich
 // @author       >_Luzifix and >_hammer065
 // @match        http://pxls.space/*
@@ -774,12 +774,6 @@
   {
     window.App.updateTemplate({"use":false});
     window.App.updateTemplate = function(a){};
-  }
-
-  const infoDiv = window.document.getElementsByClassName("info")[0];
-  if(typeof infoDiv !== "undefined")
-  {
-    infoDiv.className="info";
   }
 
   if(!(delete window.pxls_template))
