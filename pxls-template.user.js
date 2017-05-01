@@ -6,7 +6,7 @@
 // @homepageURL  https://github.com/hammer065/pxls-template
 // @version      0.7.3
 // @description  Es ist Zeit für Reich
-// @author       >_Luzifix and >_hammer065
+// @author       >_hammer065
 // @match        http://pxls.space/*
 // @match        https://pxls.space/*
 // @grant        none
@@ -66,7 +66,7 @@
         "no-tw":"Kein (gültiger) tw Parameter angegeben. Ignoriere ihn",
         "template-label":"Template anzeigen [T]",
         "flash-label":"Template flashen lassen [F]",
-        "credits":('von <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">Luzifix und <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
+        "credits":('von <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
         "time-for-reich":"Es ist Zeit für Reich!",
         "invalid-storage-key":"Ungültiger Storagename!",
         "prompt-x-coord":"Bitte gib die X-Koordinate ein, zu der du springen willst:",
@@ -102,7 +102,7 @@
         "no-tw":"No (valid) tw parameter passed. Ignoring it",
         "template-label":"Show Template [T]",
         "flash-label":"Flash Template [F]",
-        "credits":('by <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">Luzifix and <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
+        "credits":('by <img src="'+baseStaticURL+'pr0gramm-logo.svg" class="pr0User">hammer065'),
         "time-for-reich":"It's time for Reich!",
         "invalid-storage-key":"Invalid storage key!",
         "prompt-x-coord":"Please enter the X-coordinate you want to jump to:",
@@ -304,7 +304,7 @@
 
   window.console.log("pxls-template"+(version!==""?(" v"+version.toString()):""));
 
-  const query = window.location.search.substring(1).split('&');
+  const query = window.location.hash.substring(1).split('&');
   var params = {};
   for(i=0; i<query.length; i++) {
     var pair = query[i].split('=');

@@ -7,7 +7,7 @@ A UserScript to make a template overlay over the main canvas, so users can pixel
 Usage
 -----
 
-    https://pxls.space/?template=URL&ox=X&oy=Y&tw=W
+    https://pxls.space/#url=URL&ox=X&oy=Y&tw=W
 
  - `URL`: **Required**, a URL to the image which should get overlayed.
  - `X`: *Optional*, an offset on the x-axis to position the image on the canvas, defaults to 0.
