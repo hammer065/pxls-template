@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.7.4
+// @version      0.7.5
 // @description  Es ist Zeit für Reich
 // @author       >_hammer065
 // @match        http://pxls.space/*
@@ -529,7 +529,7 @@
         if(isRecording)
         {
           var a = window.document.createElement("a");
-          a.href = recordBoard.toDataURL("record/png");
+          a.href = recordBoard.toDataURL("image/png");
           a.download = "canvas_"+recordNbr+".png";
           a.click();
           if(typeof a.remove === "function")
@@ -643,12 +643,12 @@
           flashCheckbox.checked = !flashCheckbox.checked;
           updateFlash();
           break;
-          case 78: /* N */
+          case 67: /* C */
           templateSlider.value = window.parseFloat(templateSlider.value)-0.05;
           updateTemplateSlider();
           break;
 
-          case 72: /* H */
+          case 86: /* V */
           templateSlider.value = window.parseFloat(templateSlider.value)+0.05;
           updateTemplateSlider();
           break;
