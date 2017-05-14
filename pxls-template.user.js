@@ -4,7 +4,7 @@
 // @updateURL    https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @downloadURL  https://raw.githubusercontent.com/hammer065/pxls-template/master/pxls-template.user.js
 // @homepageURL  https://github.com/hammer065/pxls-template
-// @version      0.7.5
+// @version      0.7.6
 // @description  Es ist Zeit für Reich
 // @author       >_hammer065
 // @match        http://pxls.space/*
@@ -83,6 +83,7 @@
         "false-focus":"Falsches Element fokussiert. Fokussiere body...",
         "uses-fag-resize":"Es wird JavaScript zum verschieben und resizen verwendet. Aktiviere Overrides...",
         "no-dependant-class":"Konnte kein Element mit dem Klassennamen \"%0\" finden. Beende...",
+        "no-dependant-id":"Konnte kein Element mit der ID \"%0\" finden. Beende...",
         "temp-param-url":"Bitte ändere den \"template\" Teil der pxl URL zu \"url\" da die pxl devs (mal wieder) verkackt haben",
         "notication-no-string":"Kein (gültiger) string Parameter angegeben. Ignoriere notification-Aufruf",
         "set-slider":"Bitte gib einen neuen Wert für den Regler in %0 an",
@@ -119,6 +120,7 @@
         "false-focus":"Wrong element is focused. Focusing body...",
         "uses-fag-resize":"JavaScript is being used to move and resize the canvas. Activating Overrides...",
         "no-dependant-class":"Could not find any Element with class named \"%0\". Exiting...",
+        "no-dependant-id":"Could not find any Element with ID named \"%0\". Exiting...",
         "temp-param-url":"Please change the \"template\" part in the pxl URL to \"url\" since the pxl devs fucked up (again)",
         "notication-no-string":"No (valid) string parameter passed. Ignoring notification call",
         "set-slider":"Please enter a new value for the slider in %0",
@@ -290,7 +292,7 @@
     if(window.document.getElementById(uniqueIDs[i]) !== null || typeof window.pxls_template !== "undefined")
     {
       window.console.error(getString("ran-twice"));
-      alert(getString("ran-twice"));
+      window.alert(getString("ran-twice"));
       return;
     }
   }
@@ -311,10 +313,10 @@
     params[window.decodeURIComponent(pair[0])] = (typeof pair[1] !== "undefined")?window.decodeURIComponent(pair[1]):true;
   }
 
-  const uiContainer = window.document.getElementsByClassName("ui")[0];
-  if(typeof uiContainer === "undefined")
+  const uiContainer = window.document.getElementById("ui");
+  if(typeof uiContainer === "undefined" || uiContainer === null)
   {
-    window.console.error(getString("no-dependant-class", "ui"));
+    window.console.error(getString("no-dependant-id", "ui"));
     return;
   }
 
@@ -376,10 +378,10 @@
 
     if(!usesFagResize)
     {
-      const boardMover = window.document.getElementsByClassName("board-mover")[0];
-      if(typeof boardMover === "undefined")
+      const boardMover = window.document.getElementById("board-mover");
+      if(typeof boardMover === "undefined" || boardMover === null)
       {
-        window.console.error(getString("no-dependant-class", "board-mover"));
+        window.console.error(getString("no-dependant-id", "board-mover"));
         return;
       }
       boardMover.appendChild(img);
